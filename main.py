@@ -21,12 +21,7 @@ def check(inp):
 
         if i > 0 :
             if inp[i] == "+" or inp[i] == "-" :
-              
-                if inp[i] == "+":
-                    return(int(inp[:i]) + int(check(inp[i:])))
-    
-                if inp[i] == "-":
-                    return(int(inp[:i]) - int(check(inp[i:])))
+                return(int(inp[:i]) + int(check(inp[i:])))
 
             else: 
                 if len(inp) == index:
