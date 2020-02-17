@@ -1,33 +1,38 @@
 import sys
 
-inp = (sys.argv[1]).replace(" ", "")
+inp = sys.argv[1]
 
-def check(inp, first):
-    plus = False
-    minus = False
-    print(first)
+def check(inp):
     for i in range(len(inp)):
-        if inp[i]=="+" or inp[i]=="-":
+        if inp[i] == " " and i>0:
+            j=i
 
-            if inp[i]=="+":
-                plus = True
-                minus = False
-                
-            if inp[i]=="-":
-                minus = True
-                plus = False
-        
-        if minus ==  True:
-            return(int(inp[:i])-int(inp[i+1:]))
+            while inp[j]==" ":
+                j+=1
 
-        if plus == True:
-            return(int(inp[:i])+int(inp[i+1:]))
+            if inp[j].isdigit() and inp[i-1].isdigit():
+                return "Erro, verifique a exprecao"
 
-        else: 
-            if not first:
-                return inp
+    inp = (inp).replace(" ", "")
+    index = 0
 
-            else:
-                print("num")
+    for i in range(len(inp)):
+        index+=1
 
-print(check(inp,True))
+        if i > 0 :
+            if inp[i] == "+" or inp[i] == "-" :
+              
+                if inp[i] == "+":
+                    return(int(inp[:i]) + int(check(inp[i:])))
+    
+                if inp[i] == "-":
+                    return(int(inp[:i]) - int(check(inp[i:])))
+
+            else: 
+                if len(inp) == index:
+                        return int(inp)
+                        
+try:
+    print(check(inp))
+except:
+    print("Erro, verifique a exprecao")
