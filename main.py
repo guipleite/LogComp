@@ -1,35 +1,35 @@
 import sys
 
-inp = (sys.argv[1]).replace(" ", "")
+inp = sys.argv[1]
+
 
 def check(inp):
-    plus = False
-    minus = False
+    for i in range(len(inp)):
+        if inp[i] == " " and i>0:
+            #prev = inp[i-1]
+            j=i
+            while inp[j]==" ":
+                j+=1
+            if inp[j].isdigit() and inp[i-1].isdigit():
+            #if inp[i+1].isdigit() and inp[i-1].isdigit() and i>0:
+                return "Erro, verifique a exprecao"
+
+    inp = (inp).replace(" ", "")
     index = 0
 
     for i in range(len(inp)):
         index+=1
 
-        if inp[i]=="+" or inp[i]=="-":
+        if inp[i] == "+" or inp[i] == "-":
 
-            if inp[i]=="+":
-                plus = True
-                minus = False
-                
-            if inp[i]=="-":
-                minus = True
-                plus = False
-
-
-        if plus == True:
-            return(int(inp[:i]) + int(check(inp[i+1:])))
-
-        if minus ==  True:
-
-            return(int(inp[:i]) - int(check(inp[i+1:])))
+            if inp[i] == "+":
+                return(int(inp[:i]) + int(check(inp[i+1:])))
+  
+            if inp[i] == "-":
+                return(int(inp[:i]) - int(check((inp[i+1:]))))
 
         else: 
-            if len(inp)==index:
+            if len(inp) == index:
                 return inp
 
 print(check(inp))
