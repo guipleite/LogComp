@@ -1,42 +1,52 @@
-import sys
+class Token():
 
-def check(inp):
-    index = 0
-    if len(inp) == 1:
-        return int(inp)
+    def __init__(self,tokenType,tokenValue):
+        self.tokenType = tokenType
+        self.tokenValue = tokenValue
 
-    for i in range(len(inp)):
-        index+=1
+class Tokenizer():
 
-        if i > 0 :
-            if inp[i] == "+" or inp[i] == "-" :
-                return(int(inp[:i]) + int(check(inp[i:])))
+    def __init__(self,origin,position,actual):
+        self.origin = origin
+        self.positon = position
+        self.actual = None
+        self.selectNext()
+    
+    def selectNext(tokens):
+        
+        if self.origin[self.positon] == " ":
+            self.positon++
 
-            else: 
-                if len(inp) == index:
-                        return int(inp)
+        if self.origin[self.positon] == "+":
+            self.actual = "+"
 
-inp = sys.argv[1]
+        elif self.origin[self.positon] == "-":
+            self.actual = "-"
 
-def main(inp):
-    for i in range(len(inp)):
-        if inp[i] == " " and i>0:
-            j=i
+        elif self.origin[self.positon].isDigit():
+            num = ''
+            while self.origin[self.positon].isDigit():
+                num+=self.origin[self.positon]
+                self.positon++
 
-            while inp[j]== " ":
-                j+=1
+            self.actual = int(num)
 
-            if inp[j].isdigit() and inp[i-1].isdigit():
-                raise Exception("Erro, verifique a exprecao")        
+        else:
+            raise exeption "aaa"
 
-    inp = (inp).replace(" ", "")
+class Parser():
 
-    if not inp[0].isdigit() and inp[0]!="-":
-        raise Exception("Erro, verifique a exprecao")        
-    else:
-        return check(inp)
+    def __init__(self,tokens):
+        self.tokens = tokens
 
-try:
-    print(main(inp))
-except:
-    raise Exception("Erro, verifique a exprecao")        
+    tokens = Tokenizer(origin,position,actual)
+
+    @staticmethod
+    def parseExression(tokens):
+        pass
+
+    @staticmethod
+    def run(code):
+        pass
+
+
