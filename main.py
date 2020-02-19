@@ -1,20 +1,9 @@
 import sys
 
-inp = sys.argv[1]
-
 def check(inp):
-    for i in range(len(inp)):
-        if inp[i] == " " and i>0:
-            j=i
-
-            while inp[j]==" ":
-                j+=1
-
-            if inp[j].isdigit() and inp[i-1].isdigit():
-                return "Erro, verifique a exprecao"
-
-    inp = (inp).replace(" ", "")
     index = 0
+    if len(inp) == 1:
+        return int(inp)
 
     for i in range(len(inp)):
         index+=1
@@ -26,8 +15,28 @@ def check(inp):
             else: 
                 if len(inp) == index:
                         return int(inp)
-                        
+
+inp = sys.argv[1]
+
+def main(inp):
+    for i in range(len(inp)):
+        if inp[i] == " " and i>0:
+            j=i
+
+            while inp[j]== " ":
+                j+=1
+
+            if inp[j].isdigit() and inp[i-1].isdigit():
+                raise Exception("Erro, verifique a exprecao")        
+
+    inp = (inp).replace(" ", "")
+
+    if not inp[0].isdigit() and inp[0]!="-":
+        raise Exception("Erro, verifique a exprecao")        
+    else:
+        return check(inp)
+
 try:
-    print(check(inp))
+    print(main(inp))
 except:
-    print("Erro, verifique a exprecao")
+    raise Exception("Erro, verifique a exprecao")        
