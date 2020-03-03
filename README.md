@@ -4,4 +4,4 @@
 ###### Guilherme Leite
 
 Diagrama Sintático
-![Image of DS](https://github.com/guipleite/LogComp/blob/P1/DS.jpg)
+![Image of DS](./DS.jpg)

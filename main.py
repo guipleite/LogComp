@@ -15,7 +15,7 @@ class Tokenizer():
     def selectNext(tokens):
         
         if self.origin[self.positon] == " ":
-            self.positon++
+            self.positon+=1
 
         if self.origin[self.positon] == "+":
             self.actual = "+"
@@ -24,10 +24,12 @@ class Tokenizer():
             self.actual = "-"
 
         elif self.origin[self.positon].isDigit():
+
             num = ''
+
             while self.origin[self.positon].isDigit():
                 num+=self.origin[self.positon]
-                self.positon++
+                self.positon+=1
 
             self.actual = int(num)
 
@@ -43,10 +45,12 @@ class Parser():
 
     @staticmethod
     def parseExression(tokens):
+
         pass
 
     @staticmethod
     def run(code):
+        
         pass
 
 
