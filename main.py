@@ -1,42 +1,104 @@
 import sys
 
-def check(inp):
-    index = 0
-    if len(inp) == 1:
-        return int(inp)
+class Token():
 
-    for i in range(len(inp)):
-        index+=1
+    def __init__(self,tokenType,tokenValue):
+        self.tokenType = tokenType
+        self.tokenValue = tokenValue
 
-        if i > 0 :
-            if inp[i] == "+" or inp[i] == "-" :
-                return(int(inp[:i]) + int(check(inp[i:])))
+class Tokenizer(origin):
 
-            else: 
-                if len(inp) == index:
-                        return int(inp)
+    def __init__(self,origin):
+        self.origin = origin
+        self.positon = 0
+        self.actual = None
+        self.selectNext()
+    
+    def selectNext(self,tokens):
+        
+        if self.origin[self.positon] == " ":
+            self.positon+=1
 
-inp = sys.argv[1]
+        if self.origin[self.positon] == "+":
+            self.actual = "+"
 
-def main(inp):
-    for i in range(len(inp)):
-        if inp[i] == " " and i>0:
-            j=i
+        elif self.origin[self.positon] == "-":
+            self.actual = "-"
 
-            while inp[j]== " ":
-                j+=1
+        elif self.origin[self.positon].isDigit():
 
-            if inp[j].isdigit() and inp[i-1].isdigit():
-                raise Exception("Erro, verifique a exprecao")        
+            num = ''
 
-    inp = (inp).replace(" ", "")
+            while self.origin[self.positon].isDigit():
+                num+=self.origin[self.positon]
+                self.positon+=1
 
-    if not inp[0].isdigit() and inp[0]!="-":
+            self.actual = int(num)
+
+        else:
+            raise Exception("Erro, verifique a exprecao")        
+
+class Parser():
+
+    def __init__(self,tokens):
+        self.tokens = tokens
+
+    @staticmethod
+    def parseExpression(tokens):
+
+        if Parser.tokens.actual.tokenType.isDigit():
+            result = Parser.tokens.actual.tokenValue
+
+            Parser.tokens.selectNext()
+            
+            if Parser.tokens.actual.tokenType.isDigit():
+                 raise Exception("Erro, verifique a exprecao")   
+
+            while Parser.tokens.actual.tokenType == "+" or Parser.tokens.actual.tokenType == "-":
+                if Parser.tokens.actual.tokenType =="+":
+                    Parser.tokens.selectNext()
+
+                    if Parser.tokens.actual.tokenType.isDigit():
+                        result+=Parser.tokens.actual.tokenValue
+                    else: 
+                         raise Exception("Erro, verifique a exprecao")        
+
+                if Parser.tokens.actual.tokenType =="-":
+                    Parser.tokens.actual.Tokenizer.selectNext()
+
+                    if Parser.tokens.actual.tokenType.isDigit():
+                        result-=Parser.tokens.actual.tokenValue
+                    else: 
+                        raise Exception("Erro, verifique a exprecao")      
+                
+                if Parser.tokens.actual.tokenType.isDigit():##
+                    raise Exception("Erro, verifique a exprecao")     
+            
+                Parser.tokens.selectNext() ##
+
+            return result
+
+        else: 
+            raise Exception("Erro, verifique a exprecao")        
+
+    @staticmethod
+    def run(code):
+        Parser.tokens = Tokenizer(code)
+        parsed = Parser.parseExpression()
+
+        return parsed
+
+
+def main():
+
+    inp = sys.argv[1]
+
+    try:
+        print(Parser.run(inp))
+        
+    except :
         raise Exception("Erro, verifique a exprecao")        
-    else:
-        return check(inp)
 
-try:
-    print(main(inp))
-except:
-    raise Exception("Erro, verifique a exprecao")        
+
+if __name__ == '__main__':
+    main()
