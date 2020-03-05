@@ -22,7 +22,6 @@ class Tokenizer():
 
         if self.origin[self.positon] == " " and self.positon<(len(self.origin)):
             while self.origin[self.positon] == " " and self.positon<(len(self.origin)-1):
-                print(self.positon)
                 self.positon+=1
 
         if self.origin[self.positon] == "+":
@@ -47,7 +46,6 @@ class Tokenizer():
             self.actual = int(num)
             
         else:
-            print("asdas",self.origin[self.positon], "asda")
             raise Exception("Erro, verifique a exprecao 1")        
 
 class Parser():
@@ -59,7 +57,7 @@ class Parser():
     def parseExpression(tokens):
 
         Parser.tokens.selectNext(tokens)
-        print("1-     ",Parser.tokens.actual)
+
         if str(Parser.tokens.actual).isdigit():
             result = int(Parser.tokens.actual)
 
@@ -69,17 +67,14 @@ class Parser():
                 raise Exception("Erro, verifique a exprecao 2")   
 
             while Parser.tokens.actual == "+" or Parser.tokens.actual == "-":
-                print("2-      ",Parser.tokens.actual)    
 
                 if Parser.tokens.actual =="+":
                     Parser.tokens.selectNext(tokens)
-                    print("3-        ",Parser.tokens.actual)
 
                     if str(Parser.tokens.actual).isdigit():
                         result+=int(Parser.tokens.actual)
                     else: 
                          raise Exception("Erro, verifique a exprecao 3") 
-                    print("result",result)       
 
                 elif Parser.tokens.actual =="-":
                     Parser.tokens.selectNext(tokens)
@@ -111,11 +106,11 @@ def main():
 
     inp = sys.argv[1]
 
-    #try:
-    print(Parser.run(inp))
+    try:
+        print(Parser.run(inp))
         
-    #except :
-    #   raise Exception("Erro, verifique a exprecao")        
+    except :
+      raise Exception("Erro, verifique a exprecao")        
 
 
 if __name__ == '__main__':
