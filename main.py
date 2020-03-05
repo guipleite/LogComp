@@ -6,37 +6,47 @@ class Token():
         self.tokenType = tokenType
         self.tokenValue = tokenValue
 
-class Tokenizer(origin):
+class Tokenizer():
 
     def __init__(self,origin):
         self.origin = origin
         self.positon = 0
         self.actual = None
-        self.selectNext()
+        #self.selectNext()
     
     def selectNext(self,tokens):
-        
-        if self.origin[self.positon] == " ":
-            self.positon+=1
+
+        if self.positon==(len(self.origin)-1):
+            self.actual = Token('','EOF')
+            return None
+
+        if self.origin[self.positon] == " " and self.positon<(len(self.origin)):
+            while self.origin[self.positon] == " " and self.positon<(len(self.origin)-1):
+                self.positon+=1
 
         if self.origin[self.positon] == "+":
             self.actual = "+"
+            self.positon+=1
 
         elif self.origin[self.positon] == "-":
             self.actual = "-"
+            self.positon+=1
 
-        elif self.origin[self.positon].isDigit():
-
+        elif self.origin[self.positon].isdigit():
             num = ''
-
-            while self.origin[self.positon].isDigit():
+            
+            while self.origin[self.positon].isdigit():
                 num+=self.origin[self.positon]
-                self.positon+=1
+                
+                if self.positon==(len(self.origin)-1):
+                    break
+                else:
+                    self.positon+=1
 
             self.actual = int(num)
-
+            
         else:
-            raise Exception("Erro, verifique a exprecao")        
+            raise Exception("Erro, verifique a exprecao 1")        
 
 class Parser():
 
@@ -46,35 +56,38 @@ class Parser():
     @staticmethod
     def parseExpression(tokens):
 
-        if Parser.tokens.actual.tokenType.isDigit():
-            result = Parser.tokens.actual.tokenValue
+        Parser.tokens.selectNext(tokens)
 
-            Parser.tokens.selectNext()
-            
-            if Parser.tokens.actual.tokenType.isDigit():
-                 raise Exception("Erro, verifique a exprecao")   
+        if str(Parser.tokens.actual).isdigit():
+            result = int(Parser.tokens.actual)
 
-            while Parser.tokens.actual.tokenType == "+" or Parser.tokens.actual.tokenType == "-":
-                if Parser.tokens.actual.tokenType =="+":
-                    Parser.tokens.selectNext()
+            Parser.tokens.selectNext(tokens)
 
-                    if Parser.tokens.actual.tokenType.isDigit():
-                        result+=Parser.tokens.actual.tokenValue
+            if str(Parser.tokens.actual).isdigit():
+                raise Exception("Erro, verifique a exprecao 2")   
+
+            while Parser.tokens.actual == "+" or Parser.tokens.actual == "-":
+
+                if Parser.tokens.actual =="+":
+                    Parser.tokens.selectNext(tokens)
+
+                    if str(Parser.tokens.actual).isdigit():
+                        result+=int(Parser.tokens.actual)
                     else: 
-                         raise Exception("Erro, verifique a exprecao")        
+                         raise Exception("Erro, verifique a exprecao 3") 
 
-                if Parser.tokens.actual.tokenType =="-":
-                    Parser.tokens.actual.Tokenizer.selectNext()
+                elif Parser.tokens.actual =="-":
+                    Parser.tokens.selectNext(tokens)
 
-                    if Parser.tokens.actual.tokenType.isDigit():
-                        result-=Parser.tokens.actual.tokenValue
+                    if str(Parser.tokens.actual).isdigit():
+                        result-=int(Parser.tokens.actual)
                     else: 
-                        raise Exception("Erro, verifique a exprecao")      
+                        raise Exception("Erro, verifique a exprecao 4")      
                 
-                if Parser.tokens.actual.tokenType.isDigit():##
-                    raise Exception("Erro, verifique a exprecao")     
+                elif Parser.tokens.actual.isdigit():##
+                    raise Exception("Erro, verifique a exprecao 5")     
             
-                Parser.tokens.selectNext() ##
+                Parser.tokens.selectNext(tokens) ##
 
             return result
 
@@ -84,7 +97,7 @@ class Parser():
     @staticmethod
     def run(code):
         Parser.tokens = Tokenizer(code)
-        parsed = Parser.parseExpression()
+        parsed = Parser.parseExpression(Parser.tokens)
 
         return parsed
 
@@ -97,7 +110,7 @@ def main():
         print(Parser.run(inp))
         
     except :
-        raise Exception("Erro, verifique a exprecao")        
+      raise Exception("Erro, verifique a exprecao")        
 
 
 if __name__ == '__main__':
