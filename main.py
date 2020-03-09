@@ -1,5 +1,29 @@
 import sys
 
+class PrePro():
+
+    @staticmethod
+    def filter(text):
+
+        text = list(text)
+        i = 0
+
+        while(i!=len(text)):
+            if text[i]=="/" and text[i+1]=="*":
+                j=i
+                while True:
+                    i+=1
+                    if text[i]=="*" and text[i+1]=="/":
+                        break
+                
+                for k in range(j,i+2):
+                    text[k] = ''
+
+            i+=1
+        text = "".join(text)
+
+        return text
+
 class Token():
 
     def __init__(self,tokenType,tokenValue):
@@ -29,7 +53,16 @@ class Tokenizer():
             self.positon+=1
 
         elif self.origin[self.positon] == "-":
+            print("-")
             self.actual = Token('str' , '-')
+            self.positon+=1
+
+        elif self.origin[self.positon] == "*":
+            self.actual = Token('str' , '*')
+            self.positon+=1
+
+        elif self.origin[self.positon] == "/":
+            self.actual = Token('str' , '/')
             self.positon+=1
 
         elif self.origin[self.positon].isdigit():
@@ -55,8 +88,7 @@ class Parser():
         self.tokens = tokens
 
     @staticmethod
-    def parseExpression(tokens):
-
+    def parseTerm():
         if str(Parser.tokens.actual.tokenValue).isdigit():
             result = int(Parser.tokens.actual.tokenValue)
 
@@ -65,21 +97,21 @@ class Parser():
             if str(Parser.tokens.actual.tokenValue).isdigit():
                 raise Exception("Erro, verifique a exprecao 2")   
 
-            while Parser.tokens.actual.tokenValue == "+" or Parser.tokens.actual.tokenValue == "-":
+            while Parser.tokens.actual.tokenValue == "*" or Parser.tokens.actual.tokenValue == "/":
 
-                if Parser.tokens.actual.tokenValue =="+":
+                if Parser.tokens.actual.tokenValue =="*":
                     Parser.tokens.selectNext()
 
                     if str(Parser.tokens.actual.tokenValue).isdigit():
-                        result+=int(Parser.tokens.actual.tokenValue)
+                        result*=int(Parser.tokens.actual.tokenValue)
                     else: 
                          raise Exception("Erro, verifique a exprecao 3") 
 
-                elif Parser.tokens.actual.tokenValue =="-":
+                elif Parser.tokens.actual.tokenValue =="/":
                     Parser.tokens.selectNext()
 
                     if str(Parser.tokens.actual.tokenValue).isdigit():
-                        result-=int(Parser.tokens.actual.tokenValue)
+                        result//=int(Parser.tokens.actual.tokenValue)
                     else: 
                         raise Exception("Erro, verifique a exprecao 4")      
                 
@@ -91,11 +123,51 @@ class Parser():
             return result
 
         else: 
-
             raise Exception("Erro, verifique a exprecao")        
+
+
+    @staticmethod
+    def parseExpression(tokens):
+
+        result = Parser.parseTerm()
+
+        print("temp:", result)
+
+        while Parser.tokens.actual.tokenValue == "+" or Parser.tokens.actual.tokenValue == "-" :
+            if Parser.tokens.actual.tokenValue =="+":
+                Parser.tokens.selectNext()
+
+                if str(Parser.tokens.actual.tokenValue).isdigit():
+                    result+=int(Parser.tokens.actual.tokenValue)
+
+                else: 
+                    raise Exception("Erro, verifique a exprecao 3") 
+
+            elif Parser.tokens.actual.tokenValue =="-":
+                print("=")
+                Parser.tokens.selectNext()
+
+                if str(Parser.tokens.actual.tokenValue).isdigit():
+                    result-=int(Parser.tokens.actual.tokenValue)
+
+                else: 
+                    raise Exception("Erro, verifique a exprecao 4")  
+
+            elif Parser.tokens.actual.tokenValue == "*" or Parser.tokens.actual.tokenValue == "/":
+                
+                result = Parser.parseTerm()
+                print("temp2:",result)
+
+
+
+            Parser.tokens.selectNext() 
+            print("v",Parser.tokens.actual.tokenValue)
+
+        return result
 
     @staticmethod
     def run(code):
+        code = PrePro.filter(code)
         Parser.tokens = Tokenizer(code)
         parsed = Parser.parseExpression(Parser.tokens)
         return parsed
