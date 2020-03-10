@@ -77,7 +77,6 @@ class Tokenizer():
 
             self.actual = Token('int', int(num))    
 
-
         else:
            raise Exception("Erro, verifique a exprecao 1")        
         
@@ -91,10 +90,6 @@ class Parser():
         if str(Parser.tokens.actual.tokenValue).isdigit():
             result = int(Parser.tokens.actual.tokenValue)
             Parser.tokens.selectNext()
-
-
-            # if str(Parser.tokens.actual.tokenValue).isdigit():
-            #     raise Exception("Erro, verifique a exprecao 2")   
 
             while Parser.tokens.actual.tokenValue == "*" or Parser.tokens.actual.tokenValue == "/":
 
@@ -125,7 +120,6 @@ class Parser():
         else: 
             raise Exception("Erro, verifique a exprecao")        
 
-
     @staticmethod
     def parseExpression(tokens):
 
@@ -145,7 +139,6 @@ class Parser():
             elif Parser.tokens.actual.tokenValue == "*" or Parser.tokens.actual.tokenValue == "/":
                 
                 result += Parser.parseTerm()
-
 
         return result
 
