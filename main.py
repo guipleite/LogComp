@@ -15,11 +15,11 @@ class PrePro():
                     i+=1
                     if text[i]=="*" and text[i+1]=="/":
                         break
-                
                 for k in range(j,i+2):
                     text[k] = ''
 
             i+=1
+
         text = "".join(text)
 
         return text
@@ -39,7 +39,6 @@ class Tokenizer():
         self.selectNext()
     
     def selectNext(self):
-
         if self.origin[self.positon] == " " :
             while self.positon<(len(self.origin)) and  self.origin[self.positon] == " ":
                 self.positon+=1
@@ -53,7 +52,6 @@ class Tokenizer():
             self.positon+=1
 
         elif self.origin[self.positon] == "-":
-            print("-")
             self.actual = Token('str' , '-')
             self.positon+=1
 
@@ -77,7 +75,8 @@ class Tokenizer():
                 else:
                     self.positon+=1
 
-            self.actual = Token('int', int(num))      
+            self.actual = Token('int', int(num))    
+
 
         else:
            raise Exception("Erro, verifique a exprecao 1")        
@@ -91,11 +90,11 @@ class Parser():
     def parseTerm():
         if str(Parser.tokens.actual.tokenValue).isdigit():
             result = int(Parser.tokens.actual.tokenValue)
-
             Parser.tokens.selectNext()
 
-            if str(Parser.tokens.actual.tokenValue).isdigit():
-                raise Exception("Erro, verifique a exprecao 2")   
+
+            # if str(Parser.tokens.actual.tokenValue).isdigit():
+            #     raise Exception("Erro, verifique a exprecao 2")   
 
             while Parser.tokens.actual.tokenValue == "*" or Parser.tokens.actual.tokenValue == "/":
 
@@ -104,6 +103,7 @@ class Parser():
 
                     if str(Parser.tokens.actual.tokenValue).isdigit():
                         result*=int(Parser.tokens.actual.tokenValue)
+
                     else: 
                          raise Exception("Erro, verifique a exprecao 3") 
 
@@ -131,37 +131,21 @@ class Parser():
 
         result = Parser.parseTerm()
 
-        print("temp:", result)
-
         while Parser.tokens.actual.tokenValue == "+" or Parser.tokens.actual.tokenValue == "-" :
             if Parser.tokens.actual.tokenValue =="+":
                 Parser.tokens.selectNext()
 
-                if str(Parser.tokens.actual.tokenValue).isdigit():
-                    result+=int(Parser.tokens.actual.tokenValue)
-
-                else: 
-                    raise Exception("Erro, verifique a exprecao 3") 
+                result += Parser.parseTerm()
 
             elif Parser.tokens.actual.tokenValue =="-":
-                print("=")
                 Parser.tokens.selectNext()
 
-                if str(Parser.tokens.actual.tokenValue).isdigit():
-                    result-=int(Parser.tokens.actual.tokenValue)
-
-                else: 
-                    raise Exception("Erro, verifique a exprecao 4")  
+                result -= Parser.parseTerm()
 
             elif Parser.tokens.actual.tokenValue == "*" or Parser.tokens.actual.tokenValue == "/":
                 
-                result = Parser.parseTerm()
-                print("temp2:",result)
+                result += Parser.parseTerm()
 
-
-
-            Parser.tokens.selectNext() 
-            print("v",Parser.tokens.actual.tokenValue)
 
         return result
 
@@ -176,11 +160,11 @@ def main():
 
     inp = sys.argv[1]
 
-    # try:
-    print(Parser.run(inp))
+    try:
+        print(Parser.run(inp))
         
-    # except :
-    #   raise Exception("Erro, verifique a exprecao")        
+    except :
+      raise Exception("Erro, verifique a exprecao")        
 
 if __name__ == '__main__':
     main()
