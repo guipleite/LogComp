@@ -4,7 +4,8 @@
 ###### Guilherme Leite
 
 ###### Diagrama Sintático
-![Image of DS](./DS.jpg)
+
+[Image of DS](./DS.jpg)
 
 ###### EBNF
 
