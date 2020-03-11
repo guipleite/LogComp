@@ -39,7 +39,6 @@ class Tokenizer():
         self.selectNext()
     
     def selectNext(self):
-        print("--",self.origin[self.positon])
         if self.origin[self.positon] == " " :
             while self.positon<(len(self.origin)) and  self.origin[self.positon] == " ":
                 self.positon+=1
@@ -91,14 +90,12 @@ class Parser():
         if Parser.tokens.actual.tokenType=="int":
             result = int(Parser.tokens.actual.tokenValue)
             Parser.tokens.selectNext()
-            print("1",result)
-            print("2",Parser.tokens.actual.tokenValue)
+
             if str(Parser.tokens.actual.tokenValue).isdigit() and Parser.tokens.actual.tokenValue != "EOF" :
                 raise Exception("Erro, verifique a exprecao 2")   
 
 
             while Parser.tokens.actual.tokenValue == "*" or Parser.tokens.actual.tokenValue == "/":
-                print("v",Parser.tokens.actual.tokenValue)
 
                 if Parser.tokens.actual.tokenValue =="*":
                     Parser.tokens.selectNext()
@@ -131,9 +128,6 @@ class Parser():
     def parseExpression(tokens):
 
         result = Parser.parseTerm()
-
-        print("Resulr", result)
-
 
         while Parser.tokens.actual.tokenValue == "+" or Parser.tokens.actual.tokenValue == "-" :
             if Parser.tokens.actual.tokenValue =="+":
