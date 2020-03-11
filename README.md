@@ -10,7 +10,6 @@
 
 ###### EBNF
 
-    expr   : term  {("+"|"-")term}
-    term   : factor{("*"|"/")factor}
-    factor : int   {int}
-    int    : 0 | 1 | 2 | 3 | ... | 9
+    EXPRESSION   : TERM  {("+"|"-")TERM} ;
+    TERM         : FACTOR{("*"|"/")FACTOR} ;
+    FACTOR       : ("+"|"-") FACTOR | "(" EXPRESSION ")" | number ;
