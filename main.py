@@ -63,6 +63,14 @@ class Tokenizer():
             self.actual = Token('str' , '/')
             self.positon+=1
 
+        elif self.origin[self.positon] == ")" :
+            self.actual = Token('str' , ')')
+            self.positon+=1
+
+        elif self.origin[self.positon] == "(" :
+            self.actual = Token('str' , '(')
+            self.positon+=1
+
         elif self.origin[self.positon].isdigit():
 
             num = ''
@@ -88,40 +96,17 @@ class Parser():
     @staticmethod
     def parseFactor():
         
-        print(Parser.tokens.actual.tokenValue, "1")
-
         if str(Parser.tokens.actual.tokenValue).isdigit():
-            result = int(Parser.tokens.actual.tokenValue)
+            return Parser.tokens.actual.tokenValue   
+
+        elif Parser.tokens.actual.tokenValue=="(":
             Parser.tokens.selectNext()
+            result = Parser.parseExpression(Parser.tokens)
 
-            print(Parser.tokens.actual.tokenValue, "2")
-
-
-            if Parser.tokens.actual.tokenValue == "*" or Parser.tokens.actual.tokenValue == "/" :
-                pass
-
-            elif Parser.tokens.actual.tokenValue == "+" :
-                Parser.tokens.selectNext()
-
-                result += Parser.parseFactor()
-                Parser.tokens.selectNext()
-                print(Parser.tokens.actual.tokenValue, "3")
-
-            elif Parser.tokens.actual.tokenValue == "-" :
-                Parser.tokens.selectNext()
-
-                result -= Parser.parseFactor()
-                Parser.tokens.selectNext()
-                print(Parser.tokens.actual.tokenValue, "-3")
-    
-            elif Parser.tokens.actual.tokenValue == "(" :
-                result += Parser.parseExpression()
-                Parser.tokens.selectNext()
-
-                if Parser.tokens.actual.tokenValue == ")" :
-                    raise Exception("Erro, verifique a exprecao nao fechou )") 
-    
-            return result   
+            if Parser.tokens.actual.tokenValue!=")":
+                raise Exception("Erro, verifique a exprecao nao fechou )") 
+            else:
+                return result
 
         else: 
             raise Exception("Erro, verifique a exprecao a")        
@@ -129,8 +114,11 @@ class Parser():
     @staticmethod
     def parseTerm():
         result = Parser.parseFactor()
+        Parser.tokens.selectNext()
+
 
         while Parser.tokens.actual.tokenValue == "*" or Parser.tokens.actual.tokenValue == "/" :
+
             if Parser.tokens.actual.tokenValue =="*":
                 Parser.tokens.selectNext()
 
@@ -149,24 +137,20 @@ class Parser():
 
     @staticmethod
     def parseExpression(tokens):
-
         result = Parser.parseTerm()
 
         while Parser.tokens.actual.tokenValue == "+" or Parser.tokens.actual.tokenValue == "-" :
+            print("inn")
             if Parser.tokens.actual.tokenValue =="+":
                 Parser.tokens.selectNext()
-
                 result += Parser.parseTerm()
 
             elif Parser.tokens.actual.tokenValue =="-":
                 Parser.tokens.selectNext()
-
                 result -= Parser.parseTerm()
-
-            elif Parser.tokens.actual.tokenValue == "*" or Parser.tokens.actual.tokenValue == "/":
-                
-                result += Parser.parseTerm()
-
+            
+        print("aaaa",result)
+        
         return result
 
     @staticmethod
