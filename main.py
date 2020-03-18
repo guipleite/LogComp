@@ -106,8 +106,8 @@ class Parser():
             if Parser.tokens.actual.tokenValue!=")":
                 raise Exception("Erro, verifique a exprecao nao fechou )") 
             else:
+                Parser.tokens.selectNext()
                 return result
-
         else: 
             raise Exception("Erro, verifique a exprecao a")        
 
@@ -115,7 +115,6 @@ class Parser():
     def parseTerm():
         result = Parser.parseFactor()
         Parser.tokens.selectNext()
-
 
         while Parser.tokens.actual.tokenValue == "*" or Parser.tokens.actual.tokenValue == "/" :
 
@@ -129,10 +128,6 @@ class Parser():
 
                 result //= Parser.parseFactor()
 
-            # elif Parser.tokens.actual.tokenValue == "*" or Parser.tokens.actual.tokenValue == "/":
-                
-            #     result += Parser.parseFactor()
-
         return result   
 
     @staticmethod
@@ -140,7 +135,6 @@ class Parser():
         result = Parser.parseTerm()
 
         while Parser.tokens.actual.tokenValue == "+" or Parser.tokens.actual.tokenValue == "-" :
-            print("inn")
             if Parser.tokens.actual.tokenValue =="+":
                 Parser.tokens.selectNext()
                 result += Parser.parseTerm()
@@ -148,9 +142,7 @@ class Parser():
             elif Parser.tokens.actual.tokenValue =="-":
                 Parser.tokens.selectNext()
                 result -= Parser.parseTerm()
-            
-        print("aaaa",result)
-        
+                    
         return result
 
     @staticmethod
