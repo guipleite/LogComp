@@ -20,7 +20,7 @@ class PrePro():
 
             i+=1
 
-        text = "".join(text)
+        text = "".join(text)+" "
 
         return text
 
@@ -40,8 +40,14 @@ class Tokenizer():
     
     def selectNext(self):
         if self.origin[self.positon] == " " :
+            b4 = False
+            if self.origin[self.positon-1].isdigit():
+                b4 = True
             while self.positon<(len(self.origin)) and  self.origin[self.positon] == " ":
                 self.positon+=1
+            if b4 and self.positon<(len(self.origin)):
+                if self.origin[self.positon].isdigit():
+                    raise Exception("Erro, espaco enter numeros")        
 
         if self.positon==(len(self.origin)):
             self.actual = Token('' , 'EOF')
@@ -83,7 +89,7 @@ class Tokenizer():
                 else:
                     self.positon+=1
 
-            self.actual = Token('int', int(num))    
+            self.actual = Token('int', int(num))  
 
         else:
            raise Exception("Erro, verifique a exprecao 1")        
@@ -95,9 +101,10 @@ class Parser():
 
     @staticmethod
     def parseFactor():
-        
+
         if str(Parser.tokens.actual.tokenValue).isdigit():
-            return Parser.tokens.actual.tokenValue   
+            result = Parser.tokens.actual.tokenValue   
+            return result
 
         elif Parser.tokens.actual.tokenValue=="(":
             Parser.tokens.selectNext()
@@ -110,7 +117,7 @@ class Parser():
                 return result
         else: 
             raise Exception("Erro, verifique a exprecao a")        
-
+       
     @staticmethod
     def parseTerm():
         result = Parser.parseFactor()
