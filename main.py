@@ -75,6 +75,9 @@ class Tokenizer():
 
         elif self.origin[self.positon] == "(" :
             self.actual = Token('str' , '(')
+            if self.origin[self.positon-1].isdigit():
+                raise Exception("Erro, verifique a exprecao 1")        
+
             self.positon+=1
 
         elif self.origin[self.positon].isdigit():
@@ -104,6 +107,18 @@ class Parser():
 
         if str(Parser.tokens.actual.tokenValue).isdigit():
             result = Parser.tokens.actual.tokenValue   
+            return result
+
+        elif str(Parser.tokens.actual.tokenValue)== "+":
+            Parser.tokens.selectNext()
+
+            result =+ Parser.parseFactor()
+            return result
+
+        elif str(Parser.tokens.actual.tokenValue)== "-":
+            Parser.tokens.selectNext()
+
+            result =- Parser.parseFactor()
             return result
 
         elif Parser.tokens.actual.tokenValue=="(":
