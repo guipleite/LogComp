@@ -111,13 +111,11 @@ class Parser():
 
         elif str(Parser.tokens.actual.tokenValue)== "+":
             Parser.tokens.selectNext()
-
             result =+ Parser.parseFactor()
             return result
 
         elif str(Parser.tokens.actual.tokenValue)== "-":
             Parser.tokens.selectNext()
-
             result =- Parser.parseFactor()
             return result
 
@@ -128,7 +126,6 @@ class Parser():
             if Parser.tokens.actual.tokenValue!=")":
                 raise Exception("Erro, verifique a exprecao nao fechou )") 
             else:
-                Parser.tokens.selectNext()
                 return result
         else: 
             raise Exception("Erro, verifique a exprecao a")        
@@ -142,13 +139,12 @@ class Parser():
 
             if Parser.tokens.actual.tokenValue =="*":
                 Parser.tokens.selectNext()
-
                 result *= Parser.parseFactor()
 
             elif Parser.tokens.actual.tokenValue =="/":
                 Parser.tokens.selectNext()
-
                 result //= Parser.parseFactor()
+            Parser.tokens.selectNext()
 
         return result   
 
