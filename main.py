@@ -36,6 +36,7 @@ class Tokenizer():
         self.origin = origin
         self.positon = 0
         self.actual = None
+        self.counter = 0
         self.selectNext()
     
     def selectNext(self):
@@ -72,6 +73,9 @@ class Tokenizer():
         elif self.origin[self.positon] == ")" :
             self.actual = Token('str' , ')')
             self.positon+=1
+            self.counter-=1
+            if self.counter<0:
+                raise Exception("Erro, verifique a exprecao 1")      
 
         elif self.origin[self.positon] == "(" :
             self.actual = Token('str' , '(')
@@ -79,6 +83,8 @@ class Tokenizer():
                 raise Exception("Erro, verifique a exprecao 1")        
 
             self.positon+=1
+            self.counter+=1
+
 
         elif self.origin[self.positon].isdigit():
 
@@ -108,7 +114,7 @@ class Parser():
         if str(Parser.tokens.actual.tokenValue).isdigit():
             result = Parser.tokens.actual.tokenValue   
             return result
-
+  
         elif str(Parser.tokens.actual.tokenValue)== "+":
             Parser.tokens.selectNext()
             result =+ Parser.parseFactor()
@@ -118,7 +124,7 @@ class Parser():
             Parser.tokens.selectNext()
             result =- Parser.parseFactor()
             return result
-
+        
         elif Parser.tokens.actual.tokenValue=="(":
             Parser.tokens.selectNext()
             result = Parser.parseExpression(Parser.tokens)
@@ -134,7 +140,7 @@ class Parser():
     def parseTerm():
         result = Parser.parseFactor()
         Parser.tokens.selectNext()
-
+        
         while Parser.tokens.actual.tokenValue == "*" or Parser.tokens.actual.tokenValue == "/" :
 
             if Parser.tokens.actual.tokenValue =="*":
@@ -151,7 +157,7 @@ class Parser():
     @staticmethod
     def parseExpression(tokens):
         result = Parser.parseTerm()
-
+      
         while Parser.tokens.actual.tokenValue == "+" or Parser.tokens.actual.tokenValue == "-" :
             if Parser.tokens.actual.tokenValue =="+":
                 Parser.tokens.selectNext()
@@ -174,11 +180,11 @@ def main():
 
     inp = sys.argv[1]
 
-    # try:
-    print(Parser.run(inp))
+    try:
+        print(Parser.run(inp))
         
-    # except :
-    #   raise Exception("Erro, verifique a exprecao")        
+    except :
+       raise Exception("Erro, verifique a exprecao")        
 
 if __name__ == '__main__':
     main()
