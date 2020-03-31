@@ -30,6 +30,17 @@ class Token():
         self.tokenType = tokenType
         self.tokenValue = tokenValue
 
+class Node():
+
+    def __init__(self):
+        self.value = 0
+        self.children = []
+        self.Evaluate()
+
+    def Evaluate(self):
+        #return self.value
+        pass
+
 class Tokenizer():
 
     def __init__(self,origin):
@@ -102,7 +113,63 @@ class Tokenizer():
 
         else:
            raise Exception("Erro, verifique a exprecao 1")        
+
+class BinOp(Node):
+    
+    def __init__(self, value, child):
+        self.value = value
+        self.children = child
         
+    def Evaluate(self):
+
+        if self.value == '+':
+            result = self.children[0].Evaluate() + self.children[1].Evaluate()
+            return result
+
+        elif self.value == '-':
+            result = self.children[0].Evaluate() - self.children[1].Evaluate()
+            return result
+
+        elif self.value == '*':
+            result = self.children[0].Evaluate() * self.children[1].Evaluate()
+            return result
+
+        elif self.value == '/':
+            result = self.children[0].Evaluate() // self.children[1].Evaluate()
+            return result
+
+class UnOp(Node):
+
+    def __init__(self, value, child):
+        self.value = value
+        self.children = child
+
+    def Evaluate(self):
+        if self.value == '-':
+            result = -self.children[0].Evaluate()
+            return result
+
+        else:
+            return self.children[0].Evaluate()
+
+
+class IntVal(Node):
+    def __init__(self, value, child):
+        self.value = value
+        #self.children = child
+
+    def Evaluate(self):
+        return self.value
+
+class NoOp(Node):
+    def __init__(self, value, child):
+        self.value = value
+        #self.children = child
+
+    def Evaluate(self):
+        #return ""
+        pass
+
 class Parser():
 
     def __init__(self,tokens):
@@ -112,17 +179,19 @@ class Parser():
     def parseFactor():
 
         if str(Parser.tokens.actual.tokenValue).isdigit():
-            result = Parser.tokens.actual.tokenValue   
+            result = IntVal(Parser.tokens.actual.tokenValue, [])
             return result
   
         elif str(Parser.tokens.actual.tokenValue)== "+":
             Parser.tokens.selectNext()
-            result =+ Parser.parseFactor()
+            child = [Parser.parseFactor()]
+            result =  UnOp('+', child)
             return result
 
         elif str(Parser.tokens.actual.tokenValue)== "-":
             Parser.tokens.selectNext()
-            result =- Parser.parseFactor()
+            child = [Parser.parseFactor()]
+            result =  UnOp('-', child)
             return result
         
         elif Parser.tokens.actual.tokenValue=="(":
@@ -138,53 +207,60 @@ class Parser():
        
     @staticmethod
     def parseTerm():
-        result = Parser.parseFactor()
+        node = Parser.parseFactor()
         Parser.tokens.selectNext()
         
         while Parser.tokens.actual.tokenValue == "*" or Parser.tokens.actual.tokenValue == "/" :
 
             if Parser.tokens.actual.tokenValue =="*":
                 Parser.tokens.selectNext()
-                result *= Parser.parseFactor()
+                child = [node, Parser.parseFactor()]
+                node = BinOp('*', child)
 
             elif Parser.tokens.actual.tokenValue =="/":
                 Parser.tokens.selectNext()
-                result //= Parser.parseFactor()
+                child = [node, Parser.parseFactor()]
+                node = BinOp('/', child)
             Parser.tokens.selectNext()
 
-        return result   
+        return node   
 
     @staticmethod
     def parseExpression(tokens):
-        result = Parser.parseTerm()
+        node = Parser.parseTerm()
       
         while Parser.tokens.actual.tokenValue == "+" or Parser.tokens.actual.tokenValue == "-" :
             if Parser.tokens.actual.tokenValue =="+":
                 Parser.tokens.selectNext()
-                result += Parser.parseTerm()
+                child = [node, Parser.parseTerm()]
+                node = BinOp('+', child)
 
             elif Parser.tokens.actual.tokenValue =="-":
                 Parser.tokens.selectNext()
-                result -= Parser.parseTerm()
-                    
-        return result
+                child = [node, Parser.parseTerm()]
+                node = BinOp('+', child)
+        
+        return node
 
     @staticmethod
     def run(code):
         code = PrePro.filter(code)
         Parser.tokens = Tokenizer(code)
         parsed = Parser.parseExpression(Parser.tokens)
-        return parsed
+        return parsed.Evaluate()
 
 def main():
 
-    inp = sys.argv[1]
+    #inp = sys.argv[1]
+    import fileinput
 
-    try:
-        print(Parser.run(inp))
-        
-    except :
-       raise Exception("Erro, verifique a exprecao")        
+    for line in fileinput.input():
+        #process(line)
+        try:
+            print(Parser.run(line))
+            
+        except :
+            raise Exception("Erro, verifique a exprecao")        
 
 if __name__ == '__main__':
     main()
