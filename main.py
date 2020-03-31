@@ -184,13 +184,13 @@ class Parser():
   
         elif str(Parser.tokens.actual.tokenValue)== "+":
             Parser.tokens.selectNext()
-            child = [Parser.parserFactor()]
+            child = [Parser.parseFactor()]
             result =  UnOp('+', child)
             return result
 
         elif str(Parser.tokens.actual.tokenValue)== "-":
             Parser.tokens.selectNext()
-            child = [Parser.parserFactor()]
+            child = [Parser.parseFactor()]
             result =  UnOp('-', child)
             return result
         
@@ -251,13 +251,16 @@ class Parser():
 
 def main():
 
-    inp = sys.argv[1]
+    #inp = sys.argv[1]
+    import fileinput
 
-    # try:
-    print(Parser.run(inp))
-        
-    # except :
-    #    raise Exception("Erro, verifique a exprecao")        
+    for line in fileinput.input():
+        #process(line)
+        try:
+            print(Parser.run(line))
+            
+        except :
+            raise Exception("Erro, verifique a exprecao")        
 
 if __name__ == '__main__':
     main()
