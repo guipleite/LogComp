@@ -238,7 +238,7 @@ class Parser():
             elif Parser.tokens.actual.tokenValue =="-":
                 Parser.tokens.selectNext()
                 child = [node, Parser.parseTerm()]
-                node = BinOp('+', child)
+                node = BinOp('-', child)
         
         return node
 
