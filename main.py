@@ -43,30 +43,6 @@ class Node():
     def Evaluate(self):
         return self.value
 
-class SymbolTable():
-    def __init__(self):
-        self.id_dict = {}
-
-    def getter(self, iden):
-        if identifier in self.id_dict:
-            return self.id_dict[iden]
-
-        else:
-            raise Exception("Erro, verifique a exprecao identificador nao declarado")
-
-    def setter(self, iden, value):
-        self.id_dict[iden] = value
-
-class AssignOp(Node):
-    def __init__(self,value,child):
-        self.value = value
-        self.children = child
-
-    def Evaluate(self, SymbolTable):
-        print(self.value,"=",self.children.Evaluate(SymbolTable))
-
-        SymbolTable.setter(self.value,self.children.Evaluate(SymbolTable))
-    
 class Tokenizer():
 
     def __init__(self,origin):
@@ -177,21 +153,21 @@ class BinOp(Node):
         self.children = child
         
     def Evaluate(self,table):
-
+     
         if self.value == '+':
-            result = self.children[0].Evaluate() + self.children[1].Evaluate()
+            result = self.children[0].Evaluate(table) + self.children[1].Evaluate(table)
             return result
 
         elif self.value == '-':
-            result = self.children[0].Evaluate(table) - self.children[1].Evaluate()
+            result = self.children[0].Evaluate(table) - self.children[1].Evaluate(table)
             return result
 
         elif self.value == '*':
-            result = self.children[0].Evaluate() * self.children[1].Evaluate()
+            result = self.children[0].Evaluate(table) * self.children[1].Evaluate(table)
             return result
 
         elif self.value == '/':
-            result = self.children[0].Evaluate() // self.children[1].Evaluate()
+            result = self.children[0].Evaluate(table) // self.children[1].Evaluate(table)
             return result
 
 class UnOp(Node):
@@ -200,20 +176,20 @@ class UnOp(Node):
         self.value = value
         self.children = child
 
-    def Evaluate(self):
+    def Evaluate(self,table):
         if self.value == '-':
-            result = -self.children[0].Evaluate()
+            result = -self.children[0].Evaluate(table)
             return result
 
         else:
-            return self.children[0].Evaluate()
+            return self.children[0].Evaluate(table)
 
 class IntVal(Node):
     def __init__(self, value, child):
         self.value = value
         #self.children = child
 
-    def Evaluate(self):
+    def Evaluate(self,table):
         return self.value
 
 class NoOp(Node):
@@ -221,17 +197,42 @@ class NoOp(Node):
         self.value = value
         #self.children = child
 
-    def Evaluate(self):
+    def Evaluate(self,table):
         #return ""
         pass
 
-class IdenVal(Node):
+class SymbolTable():
+    def __init__(self):
+        self.id_dict = {}
+
+    def getter(self, iden):
+        if iden in self.id_dict:
+            return self.id_dict[iden]
+
+        else:
+            raise Exception("Erro, verifique a exprecao identificador nao declarado")
+
+    def setter(self, iden, value):
+        self.id_dict[iden] = value
+
+class AssignOp(Node):
     def __init__(self, value, child):
         self.value = value
-       # self.children = child
+        self.children = child
 
-    def Evaluate(self, SymbolTable):
-        result = SymbolTable.getter(self.value)
+    def Evaluate(self,table):
+        iden = self.value
+        val  = self.children.Evaluate(table)
+        print(iden,"=",val)
+
+        table.setter(self.value,self.children.Evaluate(table))
+
+class IdenVal(Node):
+    def __init__(self, value):
+        self.value = value
+
+    def Evaluate(self,table):
+        result = table.getter(self.value)
         return result
 
 class CommandOp(Node):
@@ -240,6 +241,8 @@ class CommandOp(Node):
     
     def Evaluate(self):
         for child in self.children:
+            print("aaaa")
+
             x = child.Evaluate(Parser.table)
             print ("x",Parser.table.id_dict)
 
@@ -260,10 +263,12 @@ class Parser():
 
                 if c != None:
                     commands.append(c)
+
                 print("ac",commands)
 
             if Parser.tokens.actual.tokenValue== "}":
-                # print("))",node.Evaluate())
+
+                Parser.tokens.selectNext()
                 return CommandOp(commands)
 
             else :
@@ -285,7 +290,9 @@ class Parser():
 
                 if Parser.tokens.actual.tokenValue== "=":
                     Parser.tokens.selectNext()
-                    result = AssignOp(var,Parser.parseExpression(Parser.tokens))    
+                    result = AssignOp(var,Parser.parseExpression(Parser.tokens))
+                    print(Parser.table.id_dict)
+
                 else:
                     raise Exception("Erro, verifique a exprecao =") 
 
@@ -295,7 +302,6 @@ class Parser():
             if Parser.tokens.actual.tokenValue== ";":
 
                 return result
-
         else:
             Parser.parseBlock()
 
@@ -307,8 +313,10 @@ class Parser():
             return result
 
         elif Parser.tokens.actual.tokenType == "iden":
-            result = IdenVal(Parser.tokens.actual.tokenValue, [])
+            result = IdenVal(Parser.tokens.actual.tokenValue)
+
             return result
+            
         elif str(Parser.tokens.actual.tokenValue)== "+":
             Parser.tokens.selectNext()
             child = [Parser.parseFactor()]
