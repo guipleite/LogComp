@@ -6,9 +6,12 @@ class PrePro():
     def filter(text):
 
         text = list(text)
+
         i = 0
 
         while(i!=len(text)):
+            if text[i]=="\n":
+                text[i] = ''
             if text[i]=="/" and text[i+1]=="*":
                 j=i
                 while True:
@@ -21,7 +24,6 @@ class PrePro():
             i+=1
 
         text = "".join(text)+" "
-
         return text
 
 class Token():
@@ -38,8 +40,7 @@ class Node():
         self.Evaluate()
 
     def Evaluate(self):
-        #return self.value
-        pass
+        return self.value
 
 class Tokenizer():
 
@@ -66,20 +67,67 @@ class Tokenizer():
             return None
             
         if self.origin[self.positon] == "+":
-            self.actual = Token('str' , '+')
+            self.actual = Token('operator' , '+')
             self.positon+=1
 
         elif self.origin[self.positon] == "-":
-            self.actual = Token('str' , '-')
+            self.actual = Token('operator' , '-')
             self.positon+=1
 
         elif self.origin[self.positon] == "*":
-            self.actual = Token('str' , '*')
+            self.actual = Token('operator' , '*')
             self.positon+=1
 
         elif self.origin[self.positon] == "/":
-            self.actual = Token('str' , '/')
+            self.actual = Token('operator' , '/')
             self.positon+=1
+
+        elif self.origin[self.positon] == "{":
+            self.actual = Token('command' , '{')
+            self.positon+=1
+
+        elif self.origin[self.positon] == "}":
+            self.actual = Token('command' , '}')
+            self.positon+=1
+
+        elif self.origin[self.positon] == ";":
+            self.actual = Token('endline' , ';')
+            self.positon+=1
+
+        elif self.origin[self.positon] == "$":
+            var = ''
+            self.positon+=1
+
+            if  self.origin[self.positon].isalpha():######
+                var+=self.origin[self.positon]
+                self.positon+=1
+            while self.origin[self.positon].isalnum() or self.origin[self.positon]=="_":######
+                var+=self.origin[self.positon]
+                
+                if self.positon==(len(self.origin)-1):
+                    break
+                else:
+                    self.positon+=1
+
+            self.actual = Token('iden', var)
+
+        elif self.origin[self.positon].isalpha():
+            var = self.origin[self.positon]
+            self.positon+=1
+            while self.origin[self.positon].isalpha():######
+                var+=self.origin[self.positon]
+                
+                if self.positon==(len(self.origin)-1):
+                    break
+                else:
+                    self.positon+=1
+
+            self.actual = Token('res', var)
+
+        elif self.origin[self.positon] == "=":
+            self.actual = Token('assignment' , '=')
+            self.positon+=1
+
 
         elif self.origin[self.positon] == ")" :
             self.actual = Token('str' , ')')
@@ -120,22 +168,22 @@ class BinOp(Node):
         self.value = value
         self.children = child
         
-    def Evaluate(self):
-
+    def Evaluate(self,table):
+     
         if self.value == '+':
-            result = self.children[0].Evaluate() + self.children[1].Evaluate()
+            result = self.children[0].Evaluate(table) + self.children[1].Evaluate(table)
             return result
 
         elif self.value == '-':
-            result = self.children[0].Evaluate() - self.children[1].Evaluate()
+            result = self.children[0].Evaluate(table) - self.children[1].Evaluate(table)
             return result
 
         elif self.value == '*':
-            result = self.children[0].Evaluate() * self.children[1].Evaluate()
+            result = self.children[0].Evaluate(table) * self.children[1].Evaluate(table)
             return result
 
         elif self.value == '/':
-            result = self.children[0].Evaluate() // self.children[1].Evaluate()
+            result = self.children[0].Evaluate(table) // self.children[1].Evaluate(table)
             return result
 
 class UnOp(Node):
@@ -144,21 +192,20 @@ class UnOp(Node):
         self.value = value
         self.children = child
 
-    def Evaluate(self):
+    def Evaluate(self,table):
         if self.value == '-':
-            result = -self.children[0].Evaluate()
+            result = -self.children[0].Evaluate(table)
             return result
 
         else:
-            return self.children[0].Evaluate()
-
+            return self.children[0].Evaluate(table)
 
 class IntVal(Node):
     def __init__(self, value, child):
         self.value = value
         #self.children = child
 
-    def Evaluate(self):
+    def Evaluate(self,table):
         return self.value
 
 class NoOp(Node):
@@ -166,9 +213,57 @@ class NoOp(Node):
         self.value = value
         #self.children = child
 
-    def Evaluate(self):
+    def Evaluate(self,table):
         #return ""
         pass
+
+class SymbolTable():
+    def __init__(self):
+        self.id_dict = {}
+
+    def getter(self, iden):
+        if iden in self.id_dict:
+            return self.id_dict[iden]
+
+        else:
+            raise Exception("Erro, verifique a exprecao identificador nao declarado")
+
+    def setter(self, iden, value):
+        self.id_dict[iden] = value
+
+class AssignOp(Node):
+    def __init__(self, value, child):
+        self.value = value
+        self.children = child
+
+    def Evaluate(self,table):
+        iden = self.value
+        val  = self.children.Evaluate(table)
+
+        table.setter(self.value,self.children.Evaluate(table))
+
+class IdenVal(Node):
+    def __init__(self, value):
+        self.value = value
+
+    def Evaluate(self,table):
+        result = table.getter(self.value)
+        return result
+
+class CommandOp(Node):
+    def __init__(self,child):
+        self.children = child
+    
+    def Evaluate(self,table):
+        for child in self.children:
+            child.Evaluate(table)
+
+class EchoOp(Node):
+    def __init__(self,child):
+        self.children = child
+        
+    def Evaluate(self,table):
+        print(self.children.Evaluate(table))
 
 class Parser():
 
@@ -176,12 +271,64 @@ class Parser():
         self.tokens = tokens
 
     @staticmethod
+    def parseBlock():
+        if Parser.tokens.actual.tokenValue== "{":
+            commands = []
+            while Parser.tokens.actual.tokenValue != "}":
+                Parser.tokens.selectNext()
+                c = Parser.parseCommand()
+
+                if c != None:
+                    commands.append(c)
+
+            if Parser.tokens.actual.tokenValue== "}":
+
+                Parser.tokens.selectNext()
+                return CommandOp(commands)
+
+            else :
+                raise Exception("Erro, verifique a exprecao nao fechou }") 
+        else:
+            raise Exception("Erro, verifique a exprecao nao abriu {") 
+
+    @staticmethod
+    def parseCommand():
+
+        if True:
+
+            if Parser.tokens.actual.tokenType== "iden":
+                var = Parser.tokens.actual.tokenValue
+                
+                Parser.tokens.selectNext()
+
+                if Parser.tokens.actual.tokenValue== "=":
+                    Parser.tokens.selectNext()
+                    result = AssignOp(var,Parser.parseExpression(Parser.tokens))
+
+                else:
+                    raise Exception("Erro, verifique a exprecao =") 
+
+            elif Parser.tokens.actual.tokenValue== "echo":
+                Parser.tokens.selectNext()
+                result = EchoOp(Parser.parseExpression(Parser.tokens))
+           
+            if Parser.tokens.actual.tokenValue== ";":
+
+                return result
+        else:
+            Parser.parseBlock()
+
+    @staticmethod
     def parseFactor():
 
         if str(Parser.tokens.actual.tokenValue).isdigit():
             result = IntVal(Parser.tokens.actual.tokenValue, [])
             return result
-  
+
+        elif Parser.tokens.actual.tokenType == "iden":
+            result = IdenVal(Parser.tokens.actual.tokenValue)
+            return result
+            
         elif str(Parser.tokens.actual.tokenValue)== "+":
             Parser.tokens.selectNext()
             child = [Parser.parseFactor()]
@@ -246,21 +393,25 @@ class Parser():
     def run(code):
         code = PrePro.filter(code)
         Parser.tokens = Tokenizer(code)
-        parsed = Parser.parseExpression(Parser.tokens)
-        return parsed.Evaluate()
+        table = SymbolTable()
+        parsed = Parser.parseBlock()
+        return parsed.Evaluate(table)
 
 def main():
 
-    #inp = sys.argv[1]
-    import fileinput
+    try:
+        fileobj = open(sys.argv[1], 'r')
+    except IndexError:
+        fileobj = sys.stdin
 
-    for line in fileinput.input():
-        #process(line)
-        try:
-            print(Parser.run(line))
+    with fileobj:
+        data = fileobj.read()
+
+    # try:
+        Parser.run(data)
             
-        except :
-            raise Exception("Erro, verifique a exprecao")        
+    # except :
+    #     raise Exception("Erro, verifique a exprecao")        
 
 if __name__ == '__main__':
     main()
