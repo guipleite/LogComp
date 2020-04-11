@@ -101,15 +101,18 @@ class Tokenizer():
             if  self.origin[self.positon].isalpha():######
                 var+=self.origin[self.positon]
                 self.positon+=1
-            while self.origin[self.positon].isalnum() or self.origin[self.positon]=="_":######
-                var+=self.origin[self.positon]
-                
-                if self.positon==(len(self.origin)-1):
-                    break
-                else:
-                    self.positon+=1
+                while self.origin[self.positon].isalnum() or self.origin[self.positon]=="_":######
+                    var+=self.origin[self.positon]
+                    
+                    if self.positon==(len(self.origin)-1):
+                        break
+                    else:
+                        self.positon+=1
 
-            self.actual = Token('iden', var)
+                self.actual = Token('iden', var)
+
+            else:
+                raise Exception("Erro, verifique a exprecao nome de variavel invalido")  
 
         elif self.origin[self.positon].isalpha():
             var = self.origin[self.positon]
@@ -122,7 +125,7 @@ class Tokenizer():
                 else:
                     self.positon+=1
 
-            self.actual = Token('res', var)
+            self.actual = Token('res', var.lower())
 
         elif self.origin[self.positon] == "=":
             self.actual = Token('assignment' , '=')
