@@ -19,5 +19,7 @@
     echo $a;
     echo $d;
     echo $b;
+    $re = readline();
+    echo $re ;
 }
 

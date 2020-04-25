@@ -106,6 +106,10 @@ class Tokenizer():
             self.actual = Token('endline' , ';')
             self.positon+=1
 
+        elif self.origin[self.positon] == "!":
+            self.actual = Token('un' , '!')
+            self.positon+=1
+
         elif self.origin[self.positon] == "$":
             var = ''
             self.positon+=1
@@ -217,10 +221,6 @@ class BinOp(Node):
             result = self.children[0].Evaluate(table) == self.children[1].Evaluate(table)
             return result
         
-        # elif self.value == '!':
-        #     result = not self.children[0].Evaluate(table)
-        #     return result
-        
         elif self.value == 'and':
             result = self.children[0].Evaluate(table) and self.children[1].Evaluate(table)
             return result
@@ -285,7 +285,7 @@ class AssignOp(Node):
 
     def Evaluate(self,table):
         iden = self.value
-        val  = self.children.Evaluate(table)
+        #val  = self.children.Evaluate(table)
 
         table.setter(self.value,self.children.Evaluate(table))
 
@@ -336,6 +336,15 @@ class IfOp(Node):
             else:
                 pass
 
+class ReadlineOP(Node):
+    def __init__(self):
+        # self.children = child
+        pass
+
+    def Evaluate(self, table):
+        inp = input()
+        return int(inp)
+
 class Parser():
 
     def __init__(self,tokens):
@@ -382,6 +391,15 @@ class Parser():
                     result = AssignOp(var,Parser.parseRelExpression(Parser.tokens))
 
                 else:
+                    print(Parser.tokens.actual.tokenValue)
+                    Parser.tokens.selectNext()
+                    print(Parser.tokens.actual.tokenValue)
+                    Parser.tokens.selectNext()
+                    print(Parser.tokens.actual.tokenValue)
+                    Parser.tokens.selectNext()
+                    print(Parser.tokens.actual.tokenValue)
+
+
                     raise Exception("Erro, verifique a exprecao =") 
 
             elif Parser.tokens.actual.tokenValue== "echo":
@@ -430,6 +448,7 @@ class Parser():
                             result = WhileOp([node,Parser.parseBlock()])
 
                 return result
+
             if Parser.tokens.actual.tokenValue== ";":
                 try:
                     return result
@@ -461,15 +480,33 @@ class Parser():
             child = [Parser.parseFactor()]
             result =  UnOp('-', child)
             return result
+
+        elif str(Parser.tokens.actual.tokenValue)== "!":
+            Parser.tokens.selectNext()
+            child = [Parser.parseFactor()]
+            result =  UnOp('!', child)
+            return result
         
         elif Parser.tokens.actual.tokenValue=="(":
             Parser.tokens.selectNext()
             result = Parser.parseRelExpression(Parser.tokens)
-            
+
             if Parser.tokens.actual.tokenValue!=")":
                 raise Exception("Erro, verifique a exprecao nao fechou )") 
             else:
                 return result
+
+        elif Parser.tokens.actual.tokenValue == "readline":
+            Parser.tokens.selectNext()
+            if Parser.tokens.actual.tokenValue == "(":
+                Parser.tokens.selectNext()
+                if Parser.tokens.actual.tokenValue == ")":
+
+                    result = ReadlineOP()
+
+                    # Parser.tokens.selectNext()
+                    return result
+
         else: 
             raise Exception("Erro, verifique a exprecao a")        
        
@@ -478,7 +515,7 @@ class Parser():
         node = Parser.parseFactor()
         Parser.tokens.selectNext()
         
-        while Parser.tokens.actual.tokenValue == "*" or Parser.tokens.actual.tokenValue == "/" or Parser.tokens.actual.tokenValue == "and" or Parser.tokens.actual.tokenValue == "or" :
+        while Parser.tokens.actual.tokenValue == "*" or Parser.tokens.actual.tokenValue == "/" or Parser.tokens.actual.tokenValue == "and" :
 
             if Parser.tokens.actual.tokenValue =="*":
                 Parser.tokens.selectNext()
@@ -495,11 +532,6 @@ class Parser():
                 child = [node, Parser.parseFactor()]
                 node = BinOp('and', child)
 
-            elif Parser.tokens.actual.tokenValue =="or":
-                Parser.tokens.selectNext()
-                child = [node, Parser.parseFactor()]
-                node = BinOp('or', child)
-
             Parser.tokens.selectNext()
 
         return node
@@ -508,7 +540,7 @@ class Parser():
     def parseExpression():
         node = Parser.parseTerm()
       
-        while Parser.tokens.actual.tokenValue == "+" or Parser.tokens.actual.tokenValue == "-" :
+        while Parser.tokens.actual.tokenValue == "+" or Parser.tokens.actual.tokenValue == "-" or Parser.tokens.actual.tokenValue == "or" :
             if Parser.tokens.actual.tokenValue =="+":
                 Parser.tokens.selectNext()
                 child = [node, Parser.parseTerm()]
@@ -518,6 +550,11 @@ class Parser():
                 Parser.tokens.selectNext()
                 child = [node, Parser.parseTerm()]
                 node = BinOp('-', child)
+
+            elif Parser.tokens.actual.tokenValue =="or":
+                Parser.tokens.selectNext()
+                child = [node, Parser.parseTerm()]
+                node = BinOp('or', child)
         
         return node
 
@@ -553,20 +590,20 @@ class Parser():
 
 def main():
 
-    # try:
-    #     fileobj = open(sys.argv[1], 'r')
-    # except IndexError:
-    #     fileobj = sys.stdin
+    try:
+        fileobj = open(sys.argv[1], 'r')
+    except IndexError:
+        fileobj = sys.stdin
 
-    fileobj = open("./test.php",'r')
+    # fileobj = open("./test.php",'r')
     with fileobj:
         data = fileobj.read()
 
-    # try:
+    try:
         Parser.run(data)
             
-    # except :
-    #     raise Exception("Erro, verifique a exprecao")        
+    except :
+        raise Exception("Erro, verifique a exprecao")        
 
 if __name__ == '__main__':
     main()
