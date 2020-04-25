@@ -14,6 +14,8 @@ class PrePro():
         while(i!=len(text)):
             if text[i]=="\n":
                 text[i] = ''
+            if text[i]=="}": ##
+                text[i] = "};"
             if text[i]=="/" and text[i+1]=="*":
                 j=i
                 while True:
@@ -138,8 +140,12 @@ class Tokenizer():
             self.actual = Token('res', var.lower())
 
         elif self.origin[self.positon] == "=":
-            self.actual = Token('assignment' , '=')
-            self.positon+=1
+            if (self.origin[self.positon+1]=="="):
+                self.actual = Token('eq' , '==')
+                self.positon+=2
+            else:
+                self.actual = Token('assignment' , '=')
+                self.positon+=1
 
 
         elif self.origin[self.positon] == ")" :
@@ -314,6 +320,22 @@ class WhileOp(Node):
         while self.children[0].Evaluate(table):
             self.children[1].Evaluate(table)
 
+class IfOp(Node):
+    def __init__(self, child):
+        self.children = child
+
+    def Evaluate(self,table):
+        if self.children[0].Evaluate(table):
+            return self.children[1].Evaluate(table)
+
+        else:
+
+            if len(self.children) == 3:
+                return self.children[2].Evaluate(table)
+
+            else:
+                pass
+
 class Parser():
 
     def __init__(self,tokens):
@@ -331,16 +353,15 @@ class Parser():
                     commands.append(c)
                     
             if Parser.tokens.actual.tokenValue== "}":
-                Parser.tokens.selectNext()
-                
-                print(" 1",Parser.tokens.actual.tokenValue)
+                # Parser.tokens.selectNext()
                 c = Parser.parseCommand()
 
                 if c != None:
                     commands.append(c)
-                print(" 2",Parser.tokens.actual.tokenValue)
 
-                return CommandOp(commands)
+                C =CommandOp(commands)
+                Parser.tokens.selectNext() ##
+                return C
 
             else :
                 raise Exception("Erro, verifique a exprecao nao fechou }") 
@@ -349,13 +370,11 @@ class Parser():
 
     @staticmethod
     def parseCommand():
-
+       
         if Parser.tokens.actual.tokenValue!="{":
-           # print(Parser.tokens.actual.tokenValue)
-            result = None
+            # result = None
             if Parser.tokens.actual.tokenType== "iden":
                 var = Parser.tokens.actual.tokenValue
-                
                 Parser.tokens.selectNext()
 
                 if Parser.tokens.actual.tokenValue== "=":
@@ -369,10 +388,33 @@ class Parser():
                 Parser.tokens.selectNext()
                 result = EchoOp(Parser.parseRelExpression(Parser.tokens))
 
-            # elif Parser.tokens.actual.tokenValue== "if":
-            #     Parser.tokens.selectNext()
-            #     node = Parser.parseRelExpression(Parser.tokens)
-            #     result = EchoOp(Parser.parseRelExpression(Parser.tokens))
+            elif Parser.tokens.actual.tokenValue == "if":
+                Parser.tokens.selectNext()
+                children = []
+                if Parser.tokens.actual.tokenValue == "(":
+
+                    while Parser.tokens.actual.tokenValue != ")":
+                        Parser.tokens.selectNext()
+                        node = Parser.parseRelExpression(Parser.tokens)
+                        children.append(node)
+
+                    if Parser.tokens.actual.tokenValue == ")":
+                        Parser.tokens.selectNext()
+                        if Parser.tokens.actual.tokenValue=="{":
+                            children.append(Parser.parseBlock())
+                          
+                            Parser.tokens.selectNext()
+                            if Parser.tokens.actual.tokenValue == "else":
+                                Parser.tokens.selectNext()
+                                
+                                if Parser.tokens.actual.tokenValue == "{":
+                                    children.append(Parser.parseBlock())
+
+                                elif Parser.tokens.actual.tokenValue == "if":
+
+                                    children.append(Parser.parseCommand())
+                                
+                            return IfOp(children)
 
             elif Parser.tokens.actual.tokenValue == "while":
                 Parser.tokens.selectNext()
@@ -386,9 +428,13 @@ class Parser():
                         Parser.tokens.selectNext()
                         if Parser.tokens.actual.tokenValue=="{":
                             result = WhileOp([node,Parser.parseBlock()])
-           
-            if Parser.tokens.actual.tokenValue== ";":
+
                 return result
+            if Parser.tokens.actual.tokenValue== ";":
+                try:
+                    return result
+                except:
+                    pass
 
         if Parser.tokens.actual.tokenValue=="{":
             return Parser.parseBlock()
@@ -418,8 +464,8 @@ class Parser():
         
         elif Parser.tokens.actual.tokenValue=="(":
             Parser.tokens.selectNext()
-            result = Parser.parseExpression()
-
+            result = Parser.parseRelExpression(Parser.tokens)
+            
             if Parser.tokens.actual.tokenValue!=")":
                 raise Exception("Erro, verifique a exprecao nao fechou )") 
             else:
@@ -479,7 +525,7 @@ class Parser():
     def parseRelExpression(tokens):
         node = Parser.parseExpression()
       
-        while Parser.tokens.actual.tokenValue == ">" or Parser.tokens.actual.tokenValue == "<" :
+        while Parser.tokens.actual.tokenValue == ">" or Parser.tokens.actual.tokenValue == "<" or Parser.tokens.actual.tokenValue == "==":
             if Parser.tokens.actual.tokenValue ==">":
                 Parser.tokens.selectNext()
                 child = [node, Parser.parseExpression()]
@@ -489,6 +535,11 @@ class Parser():
                 Parser.tokens.selectNext()
                 child = [node, Parser.parseExpression()]
                 node = BinOp('<', child)
+
+            elif Parser.tokens.actual.tokenValue =="==":
+                Parser.tokens.selectNext()
+                child = [node, Parser.parseExpression()]
+                node = BinOp('==', child)
         
         return node
     
@@ -502,11 +553,12 @@ class Parser():
 
 def main():
 
-    try:
-        fileobj = open(sys.argv[1], 'r')
-    except IndexError:
-        fileobj = sys.stdin
+    # try:
+    #     fileobj = open(sys.argv[1], 'r')
+    # except IndexError:
+    #     fileobj = sys.stdin
 
+    fileobj = open("./test.php",'r')
     with fileobj:
         data = fileobj.read()
 
