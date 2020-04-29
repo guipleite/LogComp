@@ -1,6 +1,6 @@
 import sys
 
-reserved_words = ["echo","and","or","!","if","while","else","readline"]
+reserved_words = ["echo","and","or","!","if","while","else","readline","true","false"]
 
 class PrePro():
 
@@ -140,8 +140,8 @@ class Tokenizer():
                     break
                 else:
                     self.positon+=1
-
-            self.actual = Token('res', var.lower())
+            if var.lower() in reserved_words:
+                self.actual = Token('res', var.lower())
 
         elif self.origin[self.positon] == "=":
             if (self.origin[self.positon+1]=="="):
@@ -455,6 +455,10 @@ class Parser():
                 except:
                     pass
 
+            
+            if Parser.tokens.actual.tokenValue== "else":
+                raise Exception("Erro, verifique a exprecao: else sem if")        
+
         if Parser.tokens.actual.tokenValue=="{":
             return Parser.parseBlock()
 
@@ -464,7 +468,7 @@ class Parser():
         if str(Parser.tokens.actual.tokenValue).isdigit():
             result = IntVal(Parser.tokens.actual.tokenValue, [])
             return result
-
+            
         elif Parser.tokens.actual.tokenType == "iden":
             result = IdenVal(Parser.tokens.actual.tokenValue)
             return result

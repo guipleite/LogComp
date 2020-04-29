@@ -11,12 +11,15 @@
 ###### EBNF
 
     BLOCK = "{", { COMMAND }, "}" ;
-    COMMAND = ( λ | ASSIGNMENT | PRINT), ";" | BLOCK ;
+    COMMAND = ( λ | ASSIGNMENT | WHILE | IF | PRINT), ";" | BLOCK ;
     ASSIGNMENT = IDENTIFIER, "=", EXPRESSION, ";" ;
     PRINT = "echo", EXPRESSION, ";" ;
-    EXPRESSION = TERM, { ("+" | "-"), TERM } ;
-    TERM = FACTOR, { ("*" | "/"), FACTOR } ;
-    FACTOR = (("+" | "-"), FACTOR) | NUMBER | "(", EXPRESSION, ")" | IDENTIFIER ;
+    WHILE = "while","(", RelEXPRESSION, ")"| BLOCK ;
+    IF = "if","(", RelEXPRESSION, ")"| BLOCK ,  ( λ |  ( "else" |BLOCK));
+    RelEXPRESSION = EXPRESSION, { ("==" | "<" | ">"), EXPRESSION } ;
+    EXPRESSION = TERM, { ("+" | "-" | "or"), TERM } ;
+    TERM = FACTOR, { ("*" | "/" | "and"), FACTOR } ;
+    FACTOR = (("+" | "-" | "not"), FACTOR) | NUMBER | "(", EXPRESSION, ")" | IDENTIFIER ;
     IDENTIFIER = "$", LETTER, { LETTER | DIGIT | "_" } ;
     NUMBER = DIGIT, { DIGIT } ;
     LETTER = ( a | ... | z | A | ... | Z ) ;
