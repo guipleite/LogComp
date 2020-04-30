@@ -255,6 +255,17 @@ class IntVal(Node):
     def Evaluate(self,table):
         return self.value
 
+class BoolVal(Node):
+    def __init__(self, value, child):
+        self.value = value
+        #self.children = child
+
+    def Evaluate(self,table):
+        if self.value == "true":
+            return 1
+        else:
+            return 0
+
 class NoOp(Node):
     def __init__(self, value, child):
         self.value = value
@@ -433,6 +444,8 @@ class Parser():
                                     children.append(Parser.parseCommand())
                                 
                             return IfOp(children)
+                else:
+                    raise Exception("Erro, verifique a exprecao: nao abriu (")        
 
             elif Parser.tokens.actual.tokenValue == "while":
                 Parser.tokens.selectNext()
@@ -468,7 +481,11 @@ class Parser():
         if str(Parser.tokens.actual.tokenValue).isdigit():
             result = IntVal(Parser.tokens.actual.tokenValue, [])
             return result
-            
+
+        elif Parser.tokens.actual.tokenValue == "true" or Parser.tokens.actual.tokenValue == "false":
+            result = BoolVal(Parser.tokens.actual.tokenValue, [])
+            return result
+
         elif Parser.tokens.actual.tokenType == "iden":
             result = IdenVal(Parser.tokens.actual.tokenValue)
             return result
@@ -512,6 +529,7 @@ class Parser():
                     return result
 
         else: 
+            print((Parser.tokens.actual.tokenValue))
             raise Exception("Erro, verifique a exprecao a")        
        
     @staticmethod
