@@ -90,7 +90,7 @@ class Tokenizer():
             self.actual = Token('operator' , '>')
             self.positon+=1
 
-        elif self.origin[self.positon] == "<":
+        elif self.origin[self.positon] == "<" and self.origin[self.positon+1] != "?":
             self.actual = Token('operator' , '<')
             self.positon+=1
 
@@ -130,6 +130,21 @@ class Tokenizer():
             else:
                 raise Exception("Erro, verifique a exprecao nome de variavel invalido")  
 
+        elif self.origin[self.positon] == '"':
+            string = ''
+            self.positon+=1
+
+           
+            while self.origin[self.positon]!='"':
+                string+=self.origin[self.positon]
+                
+                if self.positon==(len(self.origin)-1):
+                    break
+                else:
+                    self.positon+=1
+
+            self.actual = Token('str', string)
+
         elif self.origin[self.positon].isalpha():
             var = self.origin[self.positon]
             self.positon+=1
@@ -151,7 +166,6 @@ class Tokenizer():
                 self.actual = Token('assignment' , '=')
                 self.positon+=1
 
-
         elif self.origin[self.positon] == ")" :
             self.actual = Token('str' , ')')
             self.positon+=1
@@ -167,7 +181,6 @@ class Tokenizer():
             self.positon+=1
             self.counter+=1
 
-
         elif self.origin[self.positon].isdigit():
 
             num = ''
@@ -182,8 +195,17 @@ class Tokenizer():
 
             self.actual = Token('int', int(num))  
 
+        elif self.origin[self.positon] == "<" and self.origin[self.positon+1] == "?" and self.origin[self.positon+2] == "p" and self.origin[self.positon+3] == "h" and self.origin[self.positon+4] == "p"  :
+            self.positon+=5
+            self.actual = Token('<?php' , '<?php')
+
+        elif self.origin[self.positon] == "?" and self.origin[self.positon+1] == ">" :
+            self.positon+=2
+            self.actual = Token('?>' , '?>')
+
         else:
-           raise Exception("Erro, verifique a exprecao 1")        
+            print()
+            raise Exception("Erro, verifique a exprecao 1")        
 
 class BinOp(Node):
     
@@ -255,6 +277,17 @@ class IntVal(Node):
     def Evaluate(self,table):
         return self.value
 
+class BoolVal(Node):
+    def __init__(self, value, child):
+        self.value = value
+        #self.children = child
+
+    def Evaluate(self,table):
+        if self.value == "true":
+            return 1
+        else:
+            return 0
+
 class NoOp(Node):
     def __init__(self, value, child):
         self.value = value
@@ -273,6 +306,7 @@ class SymbolTable():
             return self.id_dict[iden]
 
         else:
+            print(iden)
             raise Exception("Erro, verifique a exprecao identificador nao declarado")
 
     def setter(self, iden, value):
@@ -351,36 +385,22 @@ class Parser():
         self.tokens = tokens
 
     @staticmethod
-    def parseBlock():
-        if Parser.tokens.actual.tokenValue== "{":
-            commands = []
-            while Parser.tokens.actual.tokenValue != "}":
-                Parser.tokens.selectNext()
-                c = Parser.parseCommand()
+    def parseProgram():
+        if Parser.tokens.actual.tokenValue== "<?php":
+            r = Parser.parseCommand()
 
-                if c != None:
-                    commands.append(c)
-                    
-            if Parser.tokens.actual.tokenValue== "}":
-                # Parser.tokens.selectNext()
-                c = Parser.parseCommand()
-
-                if c != None:
-                    commands.append(c)
-
-                C =CommandOp(commands)
-                Parser.tokens.selectNext() ##
-                return C
-
-            else :
-                raise Exception("Erro, verifique a exprecao nao fechou }") 
+            # if Parser.tokens.actual.tokenValue== "?>":
+            #         return r
+            # else :
+            #     raise Exception("Erro, verifique a exprecao nao fechou ?>") 
+            return r
         else:
-            raise Exception("Erro, verifique a exprecao nao abriu {") 
+            raise Exception("Erro, verifique a exprecao nao abriu <?php") 
 
+   
     @staticmethod
     def parseCommand():
-       
-        if Parser.tokens.actual.tokenValue!="{":
+        if Parser.tokens.actual.tokenValue!="{" or Parser.tokens.actual.tokenValue!="<?php":
             # result = None
             if Parser.tokens.actual.tokenType== "iden":
                 var = Parser.tokens.actual.tokenValue
@@ -429,10 +449,11 @@ class Parser():
                                     children.append(Parser.parseBlock())
 
                                 elif Parser.tokens.actual.tokenValue == "if":
-
                                     children.append(Parser.parseCommand())
                                 
                             return IfOp(children)
+                else:
+                    raise Exception("Erro, verifique a exprecao: nao abriu (")        
 
             elif Parser.tokens.actual.tokenValue == "while":
                 Parser.tokens.selectNext()
@@ -455,12 +476,37 @@ class Parser():
                 except:
                     pass
 
-            
             if Parser.tokens.actual.tokenValue== "else":
                 raise Exception("Erro, verifique a exprecao: else sem if")        
 
-        if Parser.tokens.actual.tokenValue=="{":
+        if Parser.tokens.actual.tokenValue=="{" or Parser.tokens.actual.tokenValue=="<?php":
             return Parser.parseBlock()
+    
+    @staticmethod
+    def parseBlock():
+        if Parser.tokens.actual.tokenValue== "{" or Parser.tokens.actual.tokenValue== "<?php" :
+            commands = []
+            while Parser.tokens.actual.tokenValue != "}" and Parser.tokens.actual.tokenValue != "?>":
+                Parser.tokens.selectNext()
+                c = Parser.parseCommand()
+
+                if c != None:
+                    commands.append(c)
+                    
+            if Parser.tokens.actual.tokenValue== "}" or Parser.tokens.actual.tokenValue== "?>" :
+                c = Parser.parseCommand()
+
+                if c != None:
+                    commands.append(c)
+
+                C =CommandOp(commands)
+                Parser.tokens.selectNext() ##
+                return C
+
+            else :
+                raise Exception("Erro, verifique a exprecao nao fechou }") 
+        else:
+            raise Exception("Erro, verifique a exprecao nao abriu {") 
 
     @staticmethod
     def parseFactor():
@@ -468,7 +514,11 @@ class Parser():
         if str(Parser.tokens.actual.tokenValue).isdigit():
             result = IntVal(Parser.tokens.actual.tokenValue, [])
             return result
-            
+
+        elif Parser.tokens.actual.tokenValue == "true" or Parser.tokens.actual.tokenValue == "false":
+            result = BoolVal(Parser.tokens.actual.tokenValue, [])
+            return result
+
         elif Parser.tokens.actual.tokenType == "iden":
             result = IdenVal(Parser.tokens.actual.tokenValue)
             return result
@@ -505,13 +555,12 @@ class Parser():
             if Parser.tokens.actual.tokenValue == "(":
                 Parser.tokens.selectNext()
                 if Parser.tokens.actual.tokenValue == ")":
-
                     result = ReadlineOP()
 
-                    # Parser.tokens.selectNext()
                     return result
 
         else: 
+            print((Parser.tokens.actual.tokenValue))
             raise Exception("Erro, verifique a exprecao a")        
        
     @staticmethod
@@ -589,7 +638,7 @@ class Parser():
         code = PrePro.filter(code)
         Parser.tokens = Tokenizer(code)
         table = SymbolTable()
-        parsed = Parser.parseBlock()
+        parsed = Parser.parseProgram()
         return parsed.Evaluate(table)
 
 def main():

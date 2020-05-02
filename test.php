@@ -1,4 +1,4 @@
-{
+<?php
     $b = 3;
     $c1 = 0 ;
     $a = 1;
@@ -21,5 +21,5 @@
     echo $b;
     $re = readline();
     echo $re ;
-}
+?>
 
