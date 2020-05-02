@@ -216,44 +216,48 @@ class BinOp(Node):
     def Evaluate(self,table):
      
         if self.value == '+':
-            result = self.children[0].Evaluate(table) + self.children[1].Evaluate(table)
-            return result
+            result = self.children[0].Evaluate(table)[0] + self.children[1].Evaluate(table)[0]
+            return (result,"int")
 
         elif self.value == '-':
-            result = self.children[0].Evaluate(table) - self.children[1].Evaluate(table)
-            return result
+            result = self.children[0].Evaluate(table)[0] - self.children[1].Evaluate(table)[0]
+            return (result,"int")
 
         elif self.value == '*':
-            result = self.children[0].Evaluate(table) * self.children[1].Evaluate(table)
-            return result
+            result = self.children[0].Evaluate(table)[0] * self.children[1].Evaluate(table)[0]
+            return (result,"int")
 
         elif self.value == '/':
-            result = self.children[0].Evaluate(table) // self.children[1].Evaluate(table)
-            return result
-
-        elif self.value == '>':
-            result = self.children[0].Evaluate(table) > self.children[1].Evaluate(table)
-            return result
-
-        elif self.value == '<':
-            result = self.children[0].Evaluate(table) < self.children[1].Evaluate(table)
-            return result
+            result = self.children[0].Evaluate(table)[0] // self.children[1].Evaluate(table)[0]
+            return (result,"int")
 
         elif self.value == '==':
-            result = self.children[0].Evaluate(table) == self.children[1].Evaluate(table)
-            return result
+            result = self.children[0].Evaluate(table)[0] == self.children[1].Evaluate(table)[0]
+            return (result,"bool")
         
-        elif self.value == 'and':
-            result = self.children[0].Evaluate(table) and self.children[1].Evaluate(table)
-            return result
-        
-        elif self.value == 'or':
-            result = self.children[0].Evaluate(table) or self.children[1].Evaluate(table)
-            return result
+        elif self.children[0].Evaluate(table)[1]!="str" and  self.children[1].Evaluate(table)[1]!="str":
+            if self.value == '>':
+                result = self.children[0].Evaluate(table)[0] > self.children[1].Evaluate(table)[0]
+                return (result,"bool")
+
+            elif self.value == '<':
+                result = self.children[0].Evaluate(table)[0] < self.children[1].Evaluate(table)[0]
+                return (result,"bool")
+
+            elif self.value == 'and':
+                result = self.children[0].Evaluate(table)[0] and self.children[1].Evaluate(table)[0]
+                return (result,"bool")
+            
+            elif self.value == 'or':
+                result = self.children[0].Evaluate(table)[0] or self.children[1].Evaluate(table)[0]
+                return (result,"bool")
         
         elif self.value == '.':
-            result = self.children[0].Evaluate(table) + str(self.children[1].Evaluate(table))
-            return result
+            result = self.children[0].Evaluate(table)[0] + str(self.children[1].Evaluate(table)[0])
+            return (result,"str")
+
+        else:
+             raise Exception("Erro, verifique a exprecao operacao nao permitida")
 
 class UnOp(Node):
 
@@ -279,7 +283,7 @@ class IntVal(Node):
         #self.children = child
 
     def Evaluate(self,table):
-        return self.value
+        return (self.value,"int")
 
 class BoolVal(Node):
     def __init__(self, value, child):
@@ -288,9 +292,9 @@ class BoolVal(Node):
 
     def Evaluate(self,table):
         if self.value == "true":
-            return 1
+            return (1,"bool")
         else:
-            return 0
+            return (0,"bool")
 
 class StringVal(Node):
     def __init__(self, value, child):
@@ -298,7 +302,7 @@ class StringVal(Node):
         #self.children = child
 
     def Evaluate(self,table):
-        return self.value
+        return (self.value,"str")
 
 class NoOp(Node):
     def __init__(self, value, child):
@@ -316,7 +320,6 @@ class SymbolTable():
     def getter(self, iden):
         if iden in self.id_dict:
             return self.id_dict[iden]
-
         else:
             print(iden)
             raise Exception("Erro, verifique a exprecao identificador nao declarado")
@@ -356,14 +359,14 @@ class EchoOp(Node):
         self.children = child
         
     def Evaluate(self,table):
-        print(self.children.Evaluate(table))
+        print(self.children.Evaluate(table)[0])
 
 class WhileOp(Node):
     def __init__(self,child):
         self.children = child
 
     def Evaluate(self,table):
-        while self.children[0].Evaluate(table):
+        while self.children[0].Evaluate(table)[0]:
             self.children[1].Evaluate(table)
 
 class IfOp(Node):
@@ -371,7 +374,7 @@ class IfOp(Node):
         self.children = child
 
     def Evaluate(self,table):
-        if self.children[0].Evaluate(table):
+        if self.children[0].Evaluate(table)[0]:
             return self.children[1].Evaluate(table)
 
         else:
@@ -665,12 +668,12 @@ class Parser():
 
 def main():
 
-    try:
-        fileobj = open(sys.argv[1], 'r')
-    except IndexError:
-        fileobj = sys.stdin
+    # try:
+    #     fileobj = open(sys.argv[1], 'r')
+    # except IndexError:
+    #     fileobj = sys.stdin
 
-    # fileobj = open("./test.php",'r')
+    fileobj = open("./test.php",'r')
     with fileobj:
         data = fileobj.read()
 

@@ -20,6 +20,10 @@
     echo $d;
     echo $b;
     $re = readline();
-    echo $re ;
+    $x = 1 + True; /* Ok */
+    $x = 1 and True; /* Ok */
+    $x = "a" . 1 . True; /* Ok */
+    $x = "a" == "b"; /* Ok, resultado bool: False */
+    echo $x;
 ?>
 
