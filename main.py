@@ -110,6 +110,10 @@ class Tokenizer():
             self.actual = Token('un' , '!')
             self.positon+=1
 
+        elif self.origin[self.positon] == ".":
+            self.actual = Token('concat' , '.')
+            self.positon+=1
+
         elif self.origin[self.positon] == "$":
             var = ''
             self.positon+=1
@@ -134,15 +138,11 @@ class Tokenizer():
             string = ''
             self.positon+=1
 
-           
             while self.origin[self.positon]!='"':
                 string+=self.origin[self.positon]
+                self.positon+=1
                 
-                if self.positon==(len(self.origin)-1):
-                    break
-                else:
-                    self.positon+=1
-
+            self.positon+=1
             self.actual = Token('str', string)
 
         elif self.origin[self.positon].isalpha():
@@ -250,6 +250,10 @@ class BinOp(Node):
         elif self.value == 'or':
             result = self.children[0].Evaluate(table) or self.children[1].Evaluate(table)
             return result
+        
+        elif self.value == '.':
+            result = self.children[0].Evaluate(table) + str(self.children[1].Evaluate(table))
+            return result
 
 class UnOp(Node):
 
@@ -287,6 +291,14 @@ class BoolVal(Node):
             return 1
         else:
             return 0
+
+class StringVal(Node):
+    def __init__(self, value, child):
+        self.value = value
+        #self.children = child
+
+    def Evaluate(self,table):
+        return self.value
 
 class NoOp(Node):
     def __init__(self, value, child):
@@ -396,7 +408,6 @@ class Parser():
         else:
             raise Exception("Erro, verifique a exprecao nao abriu <?php") 
 
-   
     @staticmethod
     def parseCommand():
         if Parser.tokens.actual.tokenValue!="{" and Parser.tokens.actual.tokenValue!="<?php":
@@ -486,6 +497,7 @@ class Parser():
         if Parser.tokens.actual.tokenValue== "{" or Parser.tokens.actual.tokenValue== "<?php" :
             commands = []
             while Parser.tokens.actual.tokenValue != "}" and Parser.tokens.actual.tokenValue != "?>":
+
                 Parser.tokens.selectNext()
                 c = Parser.parseCommand()
 
@@ -523,7 +535,11 @@ class Parser():
         elif Parser.tokens.actual.tokenType == "iden":
             result = IdenVal(Parser.tokens.actual.tokenValue)
             return result
-            
+        
+        elif str(Parser.tokens.actual.tokenType)== "str":
+            result = StringVal(Parser.tokens.actual.tokenValue, [])
+            return result
+
         elif str(Parser.tokens.actual.tokenValue)== "+":
             Parser.tokens.selectNext()
             child = [Parser.parseFactor()]
@@ -594,7 +610,7 @@ class Parser():
     def parseExpression():
         node = Parser.parseTerm()
       
-        while Parser.tokens.actual.tokenValue == "+" or Parser.tokens.actual.tokenValue == "-" or Parser.tokens.actual.tokenValue == "or" :
+        while Parser.tokens.actual.tokenValue == "+" or Parser.tokens.actual.tokenValue == "-" or Parser.tokens.actual.tokenValue == "or"  or Parser.tokens.actual.tokenValue == "." :
             if Parser.tokens.actual.tokenValue =="+":
                 Parser.tokens.selectNext()
                 child = [node, Parser.parseTerm()]
@@ -609,6 +625,11 @@ class Parser():
                 Parser.tokens.selectNext()
                 child = [node, Parser.parseTerm()]
                 node = BinOp('or', child)
+
+            elif Parser.tokens.actual.tokenValue ==".":
+                Parser.tokens.selectNext()
+                child = [node, Parser.parseTerm()]
+                node = BinOp('.', child)
         
         return node
 
