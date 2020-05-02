@@ -389,18 +389,17 @@ class Parser():
         if Parser.tokens.actual.tokenValue== "<?php":
             r = Parser.parseCommand()
 
-            # if Parser.tokens.actual.tokenValue== "?>":
-            #         return r
-            # else :
-            #     raise Exception("Erro, verifique a exprecao nao fechou ?>") 
-            return r
+            if Parser.tokens.actual.tokenValue== "?>":
+                    return r
+            else :
+                raise Exception("Erro, verifique a exprecao nao fechou ?>") 
         else:
             raise Exception("Erro, verifique a exprecao nao abriu <?php") 
 
    
     @staticmethod
     def parseCommand():
-        if Parser.tokens.actual.tokenValue!="{" or Parser.tokens.actual.tokenValue!="<?php":
+        if Parser.tokens.actual.tokenValue!="{" and Parser.tokens.actual.tokenValue!="<?php":
             # result = None
             if Parser.tokens.actual.tokenType== "iden":
                 var = Parser.tokens.actual.tokenValue
@@ -500,7 +499,9 @@ class Parser():
                     commands.append(c)
 
                 C =CommandOp(commands)
-                Parser.tokens.selectNext() ##
+                if Parser.tokens.actual.tokenValue!= "?>":
+                    Parser.tokens.selectNext() ##
+
                 return C
 
             else :
