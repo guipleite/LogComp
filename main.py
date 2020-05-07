@@ -204,7 +204,6 @@ class Tokenizer():
             self.actual = Token('?>' , '?>')
 
         else:
-            print()
             raise Exception("Erro, verifique a exprecao 1")        
 
 class BinOp(Node):
@@ -214,7 +213,7 @@ class BinOp(Node):
         self.children = child
         
     def Evaluate(self,table):
-     
+        
         if self.value == '+':
             result = self.children[0].Evaluate(table)[0] + self.children[1].Evaluate(table)[0]
             return (result,"int")
@@ -288,7 +287,7 @@ class IntVal(Node):
 class BoolVal(Node):
     def __init__(self, value, child):
         self.value = value
-        #self.children = child
+        self.children = child
 
     def Evaluate(self,table):
         if self.value == "true":
@@ -435,15 +434,6 @@ class Parser():
                     result = AssignOp(var,Parser.parseRelExpression(Parser.tokens))
 
                 else:
-                    print(Parser.tokens.actual.tokenValue)
-                    Parser.tokens.selectNext()
-                    print(Parser.tokens.actual.tokenValue)
-                    Parser.tokens.selectNext()
-                    print(Parser.tokens.actual.tokenValue)
-                    Parser.tokens.selectNext()
-                    print(Parser.tokens.actual.tokenValue)
-
-
                     raise Exception("Erro, verifique a exprecao =") 
 
             elif Parser.tokens.actual.tokenValue== "echo":
@@ -679,12 +669,12 @@ class Parser():
 
 def main():
 
-    # try:
-    #     fileobj = open(sys.argv[1], 'r')
-    # except IndexError:
-    #     fileobj = sys.stdin
+    try:
+        fileobj = open(sys.argv[1], 'r')
+    except IndexError:
+        fileobj = sys.stdin
 
-    fileobj = open("./test.php",'r')
+    # fileobj = open("./test.php",'r')
     with fileobj:
         data = fileobj.read()
 
