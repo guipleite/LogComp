@@ -470,11 +470,11 @@ class EchoOp(Node):
         self.children = child
         
     def Evaluate(self,table):
+        print(self.children.Evaluate(table)[0])
+
         WriteFile.addInstruction("PUSH EBX ;") # Empilhe os argumentos
         WriteFile.addInstruction("CALL print ;") # Chamada da função
         WriteFile.addInstruction("POP EBX ;") # Desempilhe os argumentos
-
-        print(self.children.Evaluate(table)[0])
 
 class WhileOp(Node):
     def __init__(self,child):
@@ -802,7 +802,7 @@ class Parser():
         table = SymbolTable()
         parsed = Parser.parseProgram()
         final = parsed.Evaluate(table)
-        WriteFile.WriteToFile("output")
+        WriteFile.WriteToFile("program")
         return final
 
 def main():

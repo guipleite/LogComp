@@ -82,19 +82,13 @@ _start:
 
   ; codigo gerado pelo compilador
 
-
-  ; interrupcao de saida
-  POP EBP
-  MOV EAX, 1
-  INT 0x80
-
 PUSH DWORD 0;
 MOV EBX, 10;
 MOV [EBP-4], EBX;
+MOV EBX, [EBP-4];
 PUSH EBX ;
 CALL print ;
 POP EBX ;
-MOV EBX, [EBP-4];
 
   ; interrupcao de saida
 POP EBP
