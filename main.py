@@ -59,20 +59,20 @@ class Token():
         self.tokenValue = tokenValue
 
 class Node():
+    currentId = 0
 
     def __init__(self):
         self.value = 0
-        self.currentId = 0
         self.children = []
         self.Evaluate()
         self.id = self.NodeId()
 
     def Evaluate(self):
         return self.value
-
-    def NodeId(self):
-        self.currentId += 1
-        return self.currentId
+    @staticmethod
+    def NodeId():
+        Node.currentId += 1
+        return Node.currentId
 
 class Tokenizer():
 
@@ -241,117 +241,120 @@ class BinOp(Node):
         self.children = child
         
     def Evaluate(self,table):
-        
+        print(self.value)
+        ebx = self.children[0].Evaluate(table) 
+        WriteFile.addInstruction("PUSH EBX ;") # O BinOp guarda o resultado na pilha
+        eax =  self.children[1].Evaluate(table)
+        print(ebx,eax)
+
         if self.value == '+':
-            ebx = self.children[0].Evaluate(table)[0] 
-            WriteFile.addInstruction("PUSH EBX;") # O BinOp guarda o resultado na pilha
+            # ebx = self.children[0].Evaluate(table)[0] 
+            # WriteFile.addInstruction("PUSH EBX ;") # O BinOp guarda o resultado na pilha
 
-            eax =  self.children[1].Evaluate(table)[0]
+            # eax =  self.children[1].Evaluate(table)[0]
             WriteFile.addInstruction("POP EAX;") # O BinOp recupera o valor da pilha em EAX
-            WriteFile.addInstruction("ADD EAX, EBX;") # O BinOp executa a operação correspondente
-            WriteFile.addInstruction("MOV EBX, EAX;") #  O BinOp retorna o valor em EBX (sempre EBX
+            WriteFile.addInstruction("ADD EAX, EBX ;") # O BinOp executa a operação correspondente
+            WriteFile.addInstruction("MOV EBX, EAX ;") #  O BinOp retorna o valor em EBX (sempre EBX
 
-            result = ebx + eax
+            result = ebx[0] + eax[0]
+            print(result)
             return (result,"int")
 
         elif self.value == '-':
-            ebx = self.children[0].Evaluate(table)[0] 
-            WriteFile.addInstruction("PUSH EBX;") # O BinOp guarda o resultado na pilha
+            # ebx = self.children[0].Evaluate(table)[0] 
+            # WriteFile.addInstruction("PUSH EBX ;") # O BinOp guarda o resultado na pilha
 
-            eax =  self.children[1].Evaluate(table)[0]
-            WriteFile.addInstruction("POP EAX;") # O BinOp recupera o valor da pilha em EAX
-            WriteFile.addInstruction("SUB EAX, EBX;") # O BinOp executa a operação correspondente
-            WriteFile.addInstruction("MOV EBX, EAX;") #  O BinOp retorna o valor em EBX (sempre EBX
+            # eax =  self.children[1].Evaluate(table)[0]
+            WriteFile.addInstruction("POP EAX ;") # O BinOp recupera o valor da pilha em EAX
+            WriteFile.addInstruction("SUB EAX, EBX ;") # O BinOp executa a operação correspondente
+            WriteFile.addInstruction("MOV EBX, EAX ;") #  O BinOp retorna o valor em EBX (sempre EBX
 
-            result = ebx - eax
+            result = ebx[0] - eax[0]
             return (result,"int")
 
         elif self.value == '*':
-            ebx = self.children[0].Evaluate(table)[0] 
-            WriteFile.addInstruction("PUSH EBX;") # O BinOp guarda o resultado na pilha
+            # ebx = self.children[0].Evaluate(table)[0] 
+            # WriteFile.addInstruction("PUSH EBX ;") # O BinOp guarda o resultado na pilha
 
-            eax =  self.children[1].Evaluate(table)[0]
-            WriteFile.addInstruction("POP EAX;") # O BinOp recupera o valor da pilha em EAX
-            WriteFile.addInstruction("IMUL EAX, EBX;") # O BinOp executa a operação correspondente
-            WriteFile.addInstruction("MOV EBX, EAX;") #  O BinOp retorna o valor em EBX (sempre EBX
+            # eax =  self.children[1].Evaluate(table)[0]
+            WriteFile.addInstruction("POP EAX ;") # O BinOp recupera o valor da pilha em EAX
+            WriteFile.addInstruction("IMUL EAX, EBX ;") # O BinOp executa a operação correspondente
+            WriteFile.addInstruction("MOV EBX, EAX ;") #  O BinOp retorna o valor em EBX (sempre EBX
 
-            result = ebx * eax
+            result = ebx[0] * eax[0]
             return (result,"int")
 
 
         elif self.value == '/':
-            ebx = self.children[0].Evaluate(table)[0] 
-            WriteFile.addInstruction("PUSH EBX;") # O BinOp guarda o resultado na pilha
+            # ebx = self.children[0].Evaluate(table)[0] 
+            # WriteFile.addInstruction("PUSH EBX ;") # O BinOp guarda o resultado na pilha
 
-            eax =  self.children[1].Evaluate(table)[0]
-            WriteFile.addInstruction("POP EAX;") # O BinOp recupera o valor da pilha em EAX
-            WriteFile.addInstruction("IDIV EAX, EBX;") # O BinOp executa a operação correspondente
-            WriteFile.addInstruction("MOV EBX, EAX;") #  O BinOp retorna o valor em EBX (sempre EBX
+            # eax =  self.children[1].Evaluate(table)[0]
+            WriteFile.addInstruction("POP EAX ;") # O BinOp recupera o valor da pilha em EAX
+            WriteFile.addInstruction("IDIV EAX, EBX ;") # O BinOp executa a operação correspondente
+            WriteFile.addInstruction("MOV EBX, EAX ;") #  O BinOp retorna o valor em EBX (sempre EBX
 
-            result = ebx // eax
+            result = ebx[0] // eax[0]
             return (result,"int")
 
 
         elif self.value == '==':
-            ebx = self.children[0].Evaluate(table)[0] 
-            WriteFile.addInstruction("PUSH EBX;") # O BinOp guarda o resultado na pilha
+            # ebx = self.children[0].Evaluate(table)[0] 
+            # WriteFile.addInstruction("PUSH EBX;") # O BinOp guarda o resultado na pilha
 
-            eax =  self.children[1].Evaluate(table)[0]
-            WriteFile.addInstruction("POP EAX;") # O BinOp recupera o valor da pilha em EAX
-            WriteFile.addInstruction("CMP EAX, EBX;") # O BinOp executa a operação correspondente
-            WriteFile.addInstruction("CALL binop_je") #  O BinOp retorna o valor em EBX (sempre EBX
+            # eax =  self.children[1].Evaluate(table)[0]
+            WriteFile.addInstruction("POP EAX ;") # O BinOp recupera o valor da pilha em EAX
+            WriteFile.addInstruction("CMP EAX, EBX ;") # O BinOp executa a operação correspondente
+            WriteFile.addInstruction("CALL binop_je ;") #  O BinOp retorna o valor em EBX (sempre EBX
 
-            result = ebx == eax
+            result = ebx[0] == eax[0]
             return (result,"bool")
 
-        
-        elif self.children[0].Evaluate(table)[1]!="str" and  self.children[1].Evaluate(table)[1]!="str":
+        elif ebx[1]!="str" and  eax[1]!="str":
             if self.value == '>':
-                ebx = self.children[0].Evaluate(table)[0] 
-                WriteFile.addInstruction("PUSH EBX;") # O BinOp guarda o resultado na pilha
+                #WriteFile.addInstruction("PUSH EBX ;") # O BinOp guarda o resultado na pilha
 
-                eax =  self.children[1].Evaluate(table)[0]
-                WriteFile.addInstruction("POP EAX;") # O BinOp recupera o valor da pilha em EAX
-                WriteFile.addInstruction("CMP EAX, EBX;") # O BinOp executa a operação correspondente
-                WriteFile.addInstruction("CALL binop_jg") #  O BinOp retorna o valor em EBX (sempre EBX
+                WriteFile.addInstruction("POP EAX ;") # O BinOp recupera o valor da pilha em EAX
+                WriteFile.addInstruction("CMP EAX, EBX ;") # O BinOp executa a operação correspondente
+                WriteFile.addInstruction("CALL binop_jg ;") #  O BinOp retorna o valor em EBX (sempre EBX
 
-                result = ebx > eax
+                result = ebx[0] > eax[0]
                 return (result,"bool")
 
             elif self.value == '<':
-                ebx = self.children[0].Evaluate(table)[0] 
-                WriteFile.addInstruction("PUSH EBX;") # O BinOp guarda o resultado na pilha
+                # ebx = self.children[0].Evaluate(table)[0] 
+                # WriteFile.addInstruction("PUSH EBX;") # O BinOp guarda o resultado na pilha
 
-                eax =  self.children[1].Evaluate(table)[0]
-                WriteFile.addInstruction("POP EAX;") # O BinOp recupera o valor da pilha em EAX
-                WriteFile.addInstruction("CMP EAX, EBX;") # O BinOp executa a operação correspondente
-                WriteFile.addInstruction("CALL binop_jl") #  O BinOp retorna o valor em EBX (sempre EBX
+                # eax =  self.children[1].Evaluate(table)[0]
+                WriteFile.addInstruction("POP EAX ;") # O BinOp recupera o valor da pilha em EAX
+                WriteFile.addInstruction("CMP EAX, EBX ;") # O BinOp executa a operação correspondente
+                WriteFile.addInstruction("CALL binop_jl ;") #  O BinOp retorna o valor em EBX (sempre EBX
 
-                result = ebx < eax
+                result = ebx[0] < eax[0]
                 return (result,"bool")
 
             elif self.value == 'and':
-                ebx = self.children[0].Evaluate(table)[0] 
-                WriteFile.addInstruction("PUSH EBX;") # O BinOp guarda o resultado na pilha
+                # ebx = self.children[0].Evaluate(table)[0] 
+                # WriteFile.addInstruction("PUSH EBX ;") # O BinOp guarda o resultado na pilha
 
-                eax =  self.children[1].Evaluate(table)[0]
+                # eax =  self.children[1].Evaluate(table)[0]
                 WriteFile.addInstruction("POP EAX;") # O BinOp recupera o valor da pilha em EAX
-                WriteFile.addInstruction("and EAX, EBX;") # O BinOp executa a operação correspondente
-                WriteFile.addInstruction("MOV EBX, EAX;") #  O BinOp retorna o valor em EBX (sempre EBX
+                WriteFile.addInstruction("and EAX, EBX ;") # O BinOp executa a operação correspondente
+                WriteFile.addInstruction("MOV EBX, EAX ;") #  O BinOp retorna o valor em EBX (sempre EBX
 
-                result = ebx and eax
+                result = ebx[0] and eax[0]
                 return (result,"bool")
             
             elif self.value == 'or':
-                ebx = self.children[0].Evaluate(table)[0] 
-                WriteFile.addInstruction("PUSH EBX;") # O BinOp guarda o resultado na pilha
+                # ebx = self.children[0].Evaluate(table)[0] 
+                # WriteFile.addInstruction("PUSH EBX ;") # O BinOp guarda o resultado na pilha
 
-                eax =  self.children[1].Evaluate(table)[0]
-                WriteFile.addInstruction("POP EAX;") # O BinOp recupera o valor da pilha em EAX
-                WriteFile.addInstruction("or EAX, EBX;") # O BinOp executa a operação correspondente
-                WriteFile.addInstruction("MOV EBX, EAX;") #  O BinOp retorna o valor em EBX (sempre EBX
+                # eax =  self.children[1].Evaluate(table)[0]
+                WriteFile.addInstruction("POP EAX ;") # O BinOp recupera o valor da pilha em EAX
+                WriteFile.addInstruction("or EAX, EBX ;") # O BinOp executa a operação correspondente
+                WriteFile.addInstruction("MOV EBX, EAX ;") #  O BinOp retorna o valor em EBX (sempre EBX
 
-                result = ebx or eax
+                result = ebx[0] or eax[0]
                 return (result,"bool")
         
         elif self.value == '.': #####
@@ -385,7 +388,7 @@ class IntVal(Node):
         #self.children = child
 
     def Evaluate(self,table):
-        WriteFile.addInstruction("MOV EBX, "+str(self.value)+";")
+        WriteFile.addInstruction("MOV EBX, "+str(self.value)+" ;")
         return (self.value,"int")
 
 class BoolVal(Node):
@@ -434,6 +437,7 @@ class SymbolTable():
         else:
             self.addr+=4
             self.id_dict[iden] = [value,self.addr]
+            WriteFile.addInstruction("PUSH DWORD 0 ;")
 
 class AssignOp(Node):
     def __init__(self, value, child):
@@ -442,10 +446,10 @@ class AssignOp(Node):
 
     def Evaluate(self,table):
         iden = self.value
-        WriteFile.addInstruction("PUSH DWORD 0;")
         table.setter(self.value,self.children.Evaluate(table))
         result = table.getter(self.value)
-        WriteFile.addInstruction("MOV [EBP-"+str(result[1])+"], EBX;")
+        print("write",iden,result)
+        WriteFile.addInstruction("MOV [EBP-"+str(result[1])+"], EBX ;")
 
 
 class IdenVal(Node):
@@ -454,7 +458,8 @@ class IdenVal(Node):
 
     def Evaluate(self,table):
         result = table.getter(self.value)
-        WriteFile.addInstruction("MOV EBX, [EBP-"+str(result[1])+"];")
+        print("read",self.value,result)
+        WriteFile.addInstruction("MOV EBX, [EBP-"+str(result[1])+"] ;")
         return result[0]
 
 class CommandOp(Node):
@@ -482,18 +487,18 @@ class WhileOp(Node):
         self.id = Node.NodeId()
 
     def Evaluate(self,table):
-        WriteFile.addInstruction("LOOP_"+self.id+": ;") #  o unique identifier do nó while 
+        WriteFile.addInstruction("LOOP_"+str(self.id)+": ;") #  o unique identifier do nó while 
 
         condition = self.children[0].Evaluate(table)[0]
-       
+        print("aaa",condition)
         WriteFile.addInstruction("CMP EBX, False ;") # verifica se o teste deu falso
-        WriteFile.addInstruction("JE EXIT_"+self.id+" ;") # e sai caso for igual a falso.
+        WriteFile.addInstruction("JE EXIT_"+str(self.id)+" ;") # e sai caso for igual a falso.
 
-        for child in self.children[1]:
-           child.Evaluate(table)
-
-        WriteFile.addInstruction("JMP LOOP_"+self.id+" ;") # volta para testar de novo
-        WriteFile.addInstruction("EXIT_"+self.id+" ;")
+        # for child in self.children:
+        #    child.Evaluate(table)
+        self.children[1].Evaluate(table)
+        WriteFile.addInstruction("JMP LOOP_"+str(self.id)+" ;") # volta para testar de novo
+        WriteFile.addInstruction("EXIT_"+str(self.id)+" ;")
 
 class IfOp(Node):
     def __init__(self, child):
@@ -507,28 +512,27 @@ class IfOp(Node):
         if condition:
             pass
             # return self.children[1].Evaluate(table)
-
         else:
 
             if len(self.children) == 3:
-                WriteFile.addInstruction("JE ELSE_"+self.id+" ;")
+                WriteFile.addInstruction("JE ELSE_"+str(self.id)+" ;")
 
                 for child in self.children[1]:
                     child.Evaluate(table)
                     
-                WriteFile.addInstruction("JMP EXIT_"+self.id+" ;") # volta para testar de novo
-                WriteFile.addInstruction("ELSE_"+self.id+" ;")
+                WriteFile.addInstruction("JMP EXIT_"+str(self.id)+" ;") # volta para testar de novo
+                WriteFile.addInstruction("ELSE_"+str(self.id)+" ;")
 
                 for child in self.children[2]:
                     child.Evaluate(table)
             else:
-                WriteFile.addInstruction("JE EXIT_"+self.id+" ;") 
+                WriteFile.addInstruction("JE EXIT_"+str(self.id)+" ;") 
                 for child in self.children[1]:
                     child.Evaluate(table)
                     
                 pass
 
-        WriteFile.addInstruction("EXIT_"+self.id+" ;")
+        WriteFile.addInstruction("EXIT_"+str(self.id)+" ;")
 
 
 class ReadlineOP(Node):
