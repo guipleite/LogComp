@@ -241,23 +241,20 @@ class BinOp(Node):
         self.children = child
         
     def Evaluate(self,table):
-        print(self.value)
         ebx = self.children[0].Evaluate(table) 
         WriteFile.addInstruction("PUSH EBX ;") # O BinOp guarda o resultado na pilha
         eax =  self.children[1].Evaluate(table)
-        print(ebx,eax)
 
         if self.value == '+':
             # ebx = self.children[0].Evaluate(table)[0] 
             # WriteFile.addInstruction("PUSH EBX ;") # O BinOp guarda o resultado na pilha
 
             # eax =  self.children[1].Evaluate(table)[0]
-            WriteFile.addInstruction("POP EAX;") # O BinOp recupera o valor da pilha em EAX
+            WriteFile.addInstruction("POP EAX ;") # O BinOp recupera o valor da pilha em EAX
             WriteFile.addInstruction("ADD EAX, EBX ;") # O BinOp executa a operação correspondente
             WriteFile.addInstruction("MOV EBX, EAX ;") #  O BinOp retorna o valor em EBX (sempre EBX
 
             result = ebx[0] + eax[0]
-            print(result)
             return (result,"int")
 
         elif self.value == '-':
@@ -300,7 +297,7 @@ class BinOp(Node):
 
         elif self.value == '==':
             # ebx = self.children[0].Evaluate(table)[0] 
-            # WriteFile.addInstruction("PUSH EBX;") # O BinOp guarda o resultado na pilha
+            # WriteFile.addInstruction("PUSH EBX ;") # O BinOp guarda o resultado na pilha
 
             # eax =  self.children[1].Evaluate(table)[0]
             WriteFile.addInstruction("POP EAX ;") # O BinOp recupera o valor da pilha em EAX
@@ -323,7 +320,7 @@ class BinOp(Node):
 
             elif self.value == '<':
                 # ebx = self.children[0].Evaluate(table)[0] 
-                # WriteFile.addInstruction("PUSH EBX;") # O BinOp guarda o resultado na pilha
+                # WriteFile.addInstruction("PUSH EBX ;") # O BinOp guarda o resultado na pilha
 
                 # eax =  self.children[1].Evaluate(table)[0]
                 WriteFile.addInstruction("POP EAX ;") # O BinOp recupera o valor da pilha em EAX
@@ -338,7 +335,7 @@ class BinOp(Node):
                 # WriteFile.addInstruction("PUSH EBX ;") # O BinOp guarda o resultado na pilha
 
                 # eax =  self.children[1].Evaluate(table)[0]
-                WriteFile.addInstruction("POP EAX;") # O BinOp recupera o valor da pilha em EAX
+                WriteFile.addInstruction("POP EAX ;") # O BinOp recupera o valor da pilha em EAX
                 WriteFile.addInstruction("and EAX, EBX ;") # O BinOp executa a operação correspondente
                 WriteFile.addInstruction("MOV EBX, EAX ;") #  O BinOp retorna o valor em EBX (sempre EBX
 
@@ -428,7 +425,6 @@ class SymbolTable():
         if iden in self.id_dict:
             return self.id_dict[iden]
         else:
-            print(iden)
             raise Exception("Erro, verifique a exprecao identificador nao declarado")
 
     def setter(self, iden, value):
@@ -448,7 +444,6 @@ class AssignOp(Node):
         iden = self.value
         table.setter(self.value,self.children.Evaluate(table))
         result = table.getter(self.value)
-        print("write",iden,result)
         WriteFile.addInstruction("MOV [EBP-"+str(result[1])+"], EBX ;")
 
 class IdenVal(Node):
@@ -457,7 +452,6 @@ class IdenVal(Node):
 
     def Evaluate(self,table):
         result = table.getter(self.value)
-        print("read",self.value,result)
         WriteFile.addInstruction("MOV EBX, [EBP-"+str(result[1])+"] ;")
         return result[0]
 
@@ -489,7 +483,6 @@ class WhileOp(Node):
         WriteFile.addInstruction("LOOP_"+str(self.id)+": ;") #  o unique identifier do nó while 
 
         condition = self.children[0].Evaluate(table)[0]
-        print("aaa",condition)
         WriteFile.addInstruction("CMP EBX, False ;") # verifica se o teste deu falso
         WriteFile.addInstruction("JE EXIT_"+str(self.id)+" ;") # e sai caso for igual a falso.
 
@@ -497,7 +490,7 @@ class WhileOp(Node):
         #    child.Evaluate(table)
         self.children[1].Evaluate(table)
         WriteFile.addInstruction("JMP LOOP_"+str(self.id)+" ;") # volta para testar de novo
-        WriteFile.addInstruction("EXIT_"+str(self.id)+" ;")
+        WriteFile.addInstruction("EXIT_"+str(self.id)+": ;")
 
 class IfOp(Node):
     def __init__(self, child):
@@ -531,7 +524,7 @@ class IfOp(Node):
                     
                 pass
 
-        WriteFile.addInstruction("EXIT_"+str(self.id)+" ;")
+        WriteFile.addInstruction("EXIT_"+str(self.id)+": ;")
 
 class ReadlineOP(Node):
     def __init__(self):
