@@ -252,7 +252,7 @@ class BinOp(Node):
                 return (result,"bool")
         
         elif self.value == '.':
-            result = self.children[0].Evaluate(table)[0] + str(self.children[1].Evaluate(table)[0])
+            result = str(self.children[0].Evaluate(table)[0]) + str(self.children[1].Evaluate(table)[0])
             return (result,"str")
 
         else:
@@ -391,7 +391,7 @@ class ReadlineOP(Node):
 
     def Evaluate(self, table):
         inp = input()
-        return int(inp)
+        return (int(inp),"int")
 
 class Parser():
 
