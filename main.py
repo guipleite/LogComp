@@ -195,14 +195,14 @@ class Tokenizer():
                 self.positon+=1
 
         elif self.origin[self.positon] == ")" :
-            self.actual = Token('str' , ')')
+            self.actual = Token('close(' , ')')
             self.positon+=1
             self.counter-=1
             if self.counter<0:
                 raise Exception("Erro, verifique a exprecao 1")      
 
         elif self.origin[self.positon] == "(" :
-            self.actual = Token('str' , '(')
+            self.actual = Token('open(' , '(')
             if self.origin[self.positon-1].isdigit():
                 raise Exception("Erro, verifique a exprecao 1")        
 
@@ -358,7 +358,7 @@ class BinOp(Node):
                 return (result,"bool")
         
         elif self.value == '.': #####
-            result = self.children[0].Evaluate(table)[0] + str(self.children[1].Evaluate(table)[0])
+            result = str(self.children[0].Evaluate(table)[0]) + str(self.children[1].Evaluate(table)[0])
             return (result,"str")
 
         else:
@@ -372,12 +372,12 @@ class UnOp(Node):
 
     def Evaluate(self,table):
         if self.value == '-':
-            result = -self.children[0].Evaluate(table)
-            return result
+            result = -self.children[0].Evaluate(table)[0]
+            return (result,self.children[0].Evaluate(table)[1])
 
         if self.value == '!':
-            result = not self.children[0].Evaluate(table)
-            return result
+            result = not self.children[0].Evaluate(table)[0]
+            return (result,self.children[0].Evaluate(table)[1])
 
         else:
             return self.children[0].Evaluate(table)
@@ -450,7 +450,6 @@ class AssignOp(Node):
         result = table.getter(self.value)
         print("write",iden,result)
         WriteFile.addInstruction("MOV [EBP-"+str(result[1])+"], EBX ;")
-
 
 class IdenVal(Node):
     def __init__(self, value):
@@ -534,7 +533,6 @@ class IfOp(Node):
 
         WriteFile.addInstruction("EXIT_"+str(self.id)+" ;")
 
-
 class ReadlineOP(Node):
     def __init__(self):
         # self.children = child
@@ -542,7 +540,7 @@ class ReadlineOP(Node):
 
     def Evaluate(self, table):
         inp = input()
-        return int(inp)
+        return (int(inp),"int")
 
 class Parser():
 
@@ -579,6 +577,8 @@ class Parser():
             elif Parser.tokens.actual.tokenValue== "echo":
                 Parser.tokens.selectNext()
                 result = EchoOp(Parser.parseRelExpression(Parser.tokens))
+                return result
+
 
             elif Parser.tokens.actual.tokenValue == "if":
                 Parser.tokens.selectNext()
