@@ -167,14 +167,14 @@ class Tokenizer():
                 self.positon+=1
 
         elif self.origin[self.positon] == ")" :
-            self.actual = Token('str' , ')')
+            self.actual = Token('close(' , ')')
             self.positon+=1
             self.counter-=1
             if self.counter<0:
                 raise Exception("Erro, verifique a exprecao 1")      
 
         elif self.origin[self.positon] == "(" :
-            self.actual = Token('str' , '(')
+            self.actual = Token('open(' , '(')
             if self.origin[self.positon-1].isdigit():
                 raise Exception("Erro, verifique a exprecao 1")        
 
@@ -428,6 +428,7 @@ class Parser():
             elif Parser.tokens.actual.tokenValue== "echo":
                 Parser.tokens.selectNext()
                 result = EchoOp(Parser.parseRelExpression(Parser.tokens))
+                return result
 
             elif Parser.tokens.actual.tokenValue == "if":
                 Parser.tokens.selectNext()
@@ -661,7 +662,7 @@ def main():
     try:
         fileobj = open(sys.argv[1], 'r')
     except IndexError:
-        fileobj = sys.stdin
+        fileobj = open("./test.php",'r')
 
     # fileobj = open("./test.php",'r')
     with fileobj:
