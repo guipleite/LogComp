@@ -266,12 +266,12 @@ class UnOp(Node):
 
     def Evaluate(self,table):
         if self.value == '-':
-            result = -self.children[0].Evaluate(table)
-            return result
+            result = -self.children[0].Evaluate(table)[0]
+            return (result,self.children[0].Evaluate(table)[1])
 
         if self.value == '!':
-            result = not self.children[0].Evaluate(table)
-            return result
+            result = not self.children[0].Evaluate(table)[0]
+            return (result,self.children[0].Evaluate(table)[1])
 
         else:
             return self.children[0].Evaluate(table)
