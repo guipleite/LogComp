@@ -348,7 +348,7 @@ class BinOp(Node):
 
                 # eax =  self.children[1].Evaluate(table)[0]
                 WriteFile.addInstruction("POP EAX ;") # O BinOp recupera o valor da pilha em EAX
-                WriteFile.addInstruction("or EAX, EBX ;") # O BinOp executa a operação correspondente
+                WriteFile.addInstruction("OR EAX, EBX ;") # O BinOp executa a operação correspondente
                 WriteFile.addInstruction("MOV EBX, EAX ;") #  O BinOp retorna o valor em EBX (sempre EBX
 
                 result = ebx[0] or eax[0]
@@ -502,8 +502,8 @@ class IfOp(Node):
         WriteFile.addInstruction("CMP EBX, False ;") # verifica se o teste deu falso
 
         if condition:
-            pass
-            # return self.children[1].Evaluate(table)
+            #spass
+            return self.children[1].Evaluate(table)
         else:
 
             if len(self.children) == 3:
@@ -521,10 +521,8 @@ class IfOp(Node):
                 WriteFile.addInstruction("JE EXIT_"+str(self.id)+" ;") 
                 for child in self.children[1]:
                     child.Evaluate(table)
-                    
-                pass
-
-        WriteFile.addInstruction("EXIT_"+str(self.id)+": ;")
+                
+            WriteFile.addInstruction("EXIT_"+str(self.id)+": ;")
 
 class ReadlineOP(Node):
     def __init__(self):
