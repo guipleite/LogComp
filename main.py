@@ -1,6 +1,6 @@
 import sys
 
-reserved_words = ["echo","and","or","!","if","while","else","readline","true","false"]
+reserved_words = ["echo","and","or","!","if","while","else","readline","true","false","function","return"]
 
 class PrePro():
 
@@ -64,7 +64,7 @@ class Tokenizer():
                 self.positon+=1
             if b4 and self.positon<(len(self.origin)):
                 if self.origin[self.positon].isdigit():
-                    raise Exception("Erro, espaco enter numeros")        
+                    raise Exception("Erro, espaco entre numeros")        
 
         if self.positon==(len(self.origin)):
             self.actual = Token('' , 'EOF')
@@ -157,6 +157,22 @@ class Tokenizer():
                     self.positon+=1
             if var.lower() in reserved_words:
                 self.actual = Token('res', var.lower())
+                if self.actual.tokenValue == "function":
+                    print("were in bois")
+                    self.positon+=1
+                    func = ''
+                    while self.origin[self.positon].isalpha() and self.origin[self.positon] != "(":
+                        func+=self.origin[self.positon]
+
+                        if self.positon==(len(self.origin)-1):
+                            break
+                        else:
+                            self.positon+=1
+
+                    print(func)
+
+            else:
+                raise Exception("Erro, palavra: '"+str(var)+ "' nao reconhecida")       
 
         elif self.origin[self.positon] == "=":
             if (self.origin[self.positon+1]=="="):

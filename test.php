@@ -19,7 +19,7 @@
     echo $a;
     echo $d;
     echo $b;
-    $re = readline();
+    /*$re = readline();*/
     $x = 1 + True; /* Ok */
     echo $x;
     $x = 1 and True; /* Ok */
@@ -28,6 +28,9 @@
     echo $x;
     $x = "a" == "b"; /* Ok, resultado bool: False */
     echo $x;
-    $x = "a" + 1; /*da ruim */
-    echo $x;
+    function soma($x, $y) {
+        $a = $x + $y;
+        return $a;
+    }
+    $c = soma(1,2);
 ?>
