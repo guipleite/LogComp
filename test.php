@@ -29,31 +29,18 @@
     $x = "a" == "b"; /* Ok, resultado bool: False */
     echo $x;
     function soma($x, $y) {
-        $a = $x + $y;
-        echo $a;
-        /*return $a*/;
+        $h = $x + $y;
+        echo $h;
+        function soma2($c, $b){
+            echo $c+$b;
+        }
+        soma2($h, 2);
+        return $h;
     }
     $j =2;
-    soma($j,2);
-    /*echo $c; */
+    $l= soma($j,2);
 
-    /*function soma() {
-        $m = 1 + 2;
-        $n = 2*$m;
-        echo $m;
-        echo $n;
-
-        function soma2() {
-            $o = 2 + 2;
-            $p = 2*$o;
-            echo $o;
-            echo $p;
-        }
-    }
-
-    echo $x;
-    $b=3;
-    soma();
-    soma2();*/
+    echo $j;
+    echo $l;
 
 ?>

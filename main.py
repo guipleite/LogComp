@@ -153,7 +153,7 @@ class Tokenizer():
         elif self.origin[self.positon].isalpha():
             var = self.origin[self.positon]
             self.positon+=1
-            while self.origin[self.positon].isalpha():
+            while self.origin[self.positon].isalpha() or self.origin[self.positon].isalnum():
                 var+=self.origin[self.positon]
                 
                 if self.positon==(len(self.origin)-1):
@@ -161,8 +161,7 @@ class Tokenizer():
                 else:
                     self.positon+=1
             if var.lower() in reserved_words:
-                if (var.lower()=='return'):
-                    print("ret")
+        
                 self.actual = Token('res', var.lower())
                 if self.actual.tokenValue == "function":
 
@@ -390,10 +389,10 @@ class FuncCall(Node):
             func_table.setter(nodes[0][var],self.children[var].Evaluate(table))
 
         for node in nodes[1]:
+            # print(node)
             node.Evaluate(func_table) ##
-            
-        return table.func_getter(self.value)
 
+        return table.func_getter(self.value)
 
 class AssignOp(Node):
     def __init__(self, value, child):
@@ -484,7 +483,6 @@ class Parser():
             # result = None
             if Parser.tokens.actual.tokenType== "iden":
                 var = Parser.tokens.actual.tokenValue
-
                 Parser.tokens.selectNext()
 
                 if Parser.tokens.actual.tokenValue== "=":
@@ -591,17 +589,19 @@ class Parser():
 
                         arg_list.append(Parser.parseRelExpression(Parser.tokens.actual))
           
-                    print(arg_list)
-
                     Parser.tokens.selectNext()
 
                     return FuncCall(func_name, arg_list)
                 
                 else:
+                    print(Parser.tokens.actual.tokenValue)
                     raise Exception("Erro, verifique a exprecao: funcao mal declarada")    
 
             elif Parser.tokens.actual.tokenValue == "return":
-                return Parser.parseFactor()
+                Parser.tokens.selectNext() ##
+                result = Parser.parseFactor()
+
+                return result
 
             if Parser.tokens.actual.tokenValue== ";":
                 try:
@@ -648,6 +648,7 @@ class Parser():
     def parseFactor():
         if Parser.tokens.actual.tokenValue == ",":
             Parser.tokens.selectNext()
+
         if str(Parser.tokens.actual.tokenValue).isdigit():
             result = IntVal(Parser.tokens.actual.tokenValue, [])
             return result
@@ -700,28 +701,26 @@ class Parser():
 
                     return result
 
-        elif  Parser.tokens.actual.tokenValue == "return":
-            print("call with ret")
-
-            Parser.tokens.selectNext()
+        elif  Parser.tokens.actual.tokenType == "function_c":
             func_name = Parser.tokens.actual.tokenValue
+            Parser.tokens.selectNext()
 
             if  Parser.tokens.actual.tokenValue == "(":
                 arg_list = []
+                Parser.tokens.selectNext()
+                
                 while Parser.tokens.actual.tokenValue != ")":
 
-                    if Parser.tokens.actual.tokenType== "iden":
-                        arg_list.append(Parser.tokens.actual.tokenValue)
-                    
-                    Parser.tokens.selectNext()
-
-                Parser.tokens.selectNext()
-
+                    arg_list.append(Parser.parseRelExpression(Parser.tokens.actual))
+        
                 return FuncCall(func_name, arg_list)
             
             else:
-                print(Parser.tokens.actual.tokenValue)
                 raise Exception("Erro, verifique a exprecao: funcao mal declarada")    
+        
+        elif Parser.tokens.actual.tokenValue == "return":
+            Parser.tokens.selectNext()
+            return Parser.parseRelExpression(Parser.tokens)
 
         else: 
             print((Parser.tokens.actual.tokenValue),(Parser.tokens.actual.tokenType))
