@@ -160,6 +160,7 @@ class Tokenizer():
                     break
                 else:
                     self.positon+=1
+
             if var.lower() in reserved_words:
         
                 self.actual = Token('res', var.lower())
@@ -342,8 +343,8 @@ class NoOp(Node):
 class SymbolTable():
     def __init__(self):
         self.id_dict = {}
-        self.func_dict = {}
-
+        # self.func_dict = {}
+    func_dict = {}
     def getter(self, iden):
         if iden in self.id_dict:
             return self.id_dict[iden]
@@ -354,17 +355,18 @@ class SymbolTable():
     def setter(self, iden, value):
         self.id_dict[iden] = value
 
-    def func_getter(self, iden):
-        if iden in self.func_dict:
-            return self.func_dict[iden]
-        else:
+    @staticmethod
+    def func_getter( iden):
+        if iden in SymbolTable.func_dict:
+            return SymbolTable.func_dict[iden]
+        elif iden != 'return':
             print(iden)
             raise Exception("Erro, verifique a exprecao funcao nao declarada")
 
-    # @staticmethod
-    def func_setter(self, iden, value):
-        if iden not in self.func_dict:
-            self.func_dict[iden] = value
+    @staticmethod
+    def func_setter(iden, value):
+        if iden not in SymbolTable.func_dict or iden !="function":
+            SymbolTable.func_dict[iden] = value
 
 class FuncDec(Node):
     def __init__(self, value, child):
@@ -389,10 +391,24 @@ class FuncCall(Node):
             func_table.setter(nodes[0][var],self.children[var].Evaluate(table))
 
         for node in nodes[1]:
-            # print(node)
+
             node.Evaluate(func_table) ##
 
-        return table.func_getter(self.value)
+        try:
+            return func_table.func_getter("return")
+        except:
+            pass
+        # return table.func_getter(self.value)
+
+class ReturnOp(Node):
+    def __init__(self, value):
+        self.value = value
+
+    def Evaluate(self,table):
+
+        table.func_setter("return",self.value.Evaluate(table))
+
+        # print(table.getter("function"))
 
 class AssignOp(Node):
     def __init__(self, value, child):
@@ -598,10 +614,11 @@ class Parser():
                     raise Exception("Erro, verifique a exprecao: funcao mal declarada")    
 
             elif Parser.tokens.actual.tokenValue == "return":
-                Parser.tokens.selectNext() ##
-                result = Parser.parseFactor()
 
-                return result
+                Parser.tokens.selectNext()
+                result = Parser.parseRelExpression(Parser.tokens)
+                
+                return ReturnOp(result)
 
             if Parser.tokens.actual.tokenValue== ";":
                 try:
@@ -717,11 +734,7 @@ class Parser():
             
             else:
                 raise Exception("Erro, verifique a exprecao: funcao mal declarada")    
-        
-        elif Parser.tokens.actual.tokenValue == "return":
-            Parser.tokens.selectNext()
-            return Parser.parseRelExpression(Parser.tokens)
-
+    
         else: 
             print((Parser.tokens.actual.tokenValue),(Parser.tokens.actual.tokenType))
             raise Exception("Erro, verifique a exprecao a")        

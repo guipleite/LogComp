@@ -40,6 +40,7 @@
     $j =2;
     $l= soma($j,2);
 
+    soma2(8, 2);
     echo $j;
     echo $l;
 
