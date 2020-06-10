@@ -33,4 +33,25 @@
         return $a;
     }
     $c = soma(1,2);
+    echo $c;
+
+    /*function soma() {
+        $m = 1 + 2;
+        $n = 2*$m;
+        echo $m;
+        echo $n;
+
+        function soma2() {
+            $o = 2 + 2;
+            $p = 2*$o;
+            echo $o;
+            echo $p;
+        }
+    }
+
+    echo $x;
+    $b=3;
+    soma();
+    soma2();*/
+
 ?>

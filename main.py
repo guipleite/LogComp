@@ -1,6 +1,7 @@
 import sys
 
 reserved_words = ["echo","and","or","!","if","while","else","readline","true","false","function","return"]
+declared_funcs = []
 
 class PrePro():
 
@@ -114,6 +115,10 @@ class Tokenizer():
             self.actual = Token('concat' , '.')
             self.positon+=1
 
+        elif self.origin[self.positon] == ",":
+            self.actual = Token('comma' , ',')
+            self.positon+=1
+
         elif self.origin[self.positon] == "$":
             var = ''
             self.positon+=1
@@ -156,12 +161,15 @@ class Tokenizer():
                 else:
                     self.positon+=1
             if var.lower() in reserved_words:
+                if (var.lower()=='return'):
+                    print("ret")
                 self.actual = Token('res', var.lower())
                 if self.actual.tokenValue == "function":
-                    print("were in bois")
+
                     self.positon+=1
                     func = ''
-                    while self.origin[self.positon].isalpha() and self.origin[self.positon] != "(":
+
+                    while (self.origin[self.positon].isalnum() or self.origin[self.positon]=="_") and self.origin[self.positon] != "(":
                         func+=self.origin[self.positon]
 
                         if self.positon==(len(self.origin)-1):
@@ -169,7 +177,12 @@ class Tokenizer():
                         else:
                             self.positon+=1
 
-                    print(func)
+                    declared_funcs.append(func)
+
+                    self.actual = Token('function_d', func)
+
+            elif (var in declared_funcs):
+                self.actual = Token('function_c', var)
 
             else:
                 raise Exception("Erro, palavra: '"+str(var)+ "' nao reconhecida")       
@@ -191,8 +204,8 @@ class Tokenizer():
 
         elif self.origin[self.positon] == "(" :
             self.actual = Token('open(' , '(')
-            if self.origin[self.positon-1].isdigit():
-                raise Exception("Erro, verifique a exprecao 1")        
+            # if self.origin[self.positon-1].isdigit():
+            #     raise Exception("Erro, verifique a exprecao 1")        
 
             self.positon+=1
             self.counter+=1
@@ -220,7 +233,7 @@ class Tokenizer():
             self.actual = Token('?>' , '?>')
 
         else:
-            raise Exception("Erro, verifique a exprecao 1")        
+            raise Exception("Erro, token invalido",self.origin[self.positon])        
 
 class BinOp(Node):
     
@@ -331,6 +344,7 @@ class NoOp(Node):
 class SymbolTable():
     def __init__(self):
         self.id_dict = {}
+        self.func_dict = {}
 
     def getter(self, iden):
         if iden in self.id_dict:
@@ -342,14 +356,60 @@ class SymbolTable():
     def setter(self, iden, value):
         self.id_dict[iden] = value
 
+    def func_getter(self, iden):
+        if iden in self.func_dict:
+            return self.func_dict[iden]
+        else:
+            print(iden)
+            raise Exception("Erro, verifique a exprecao funcao nao declarada")
+
+    # @staticmethod
+    def func_setter(self, iden, value):
+        if iden not in self.func_dict:
+            self.func_dict[iden] = value
+
+class FuncDec(Node):
+    def __init__(self, value, child):
+        self.value = value
+        self.children = child
+
+    def Evaluate(self,table):
+        table.func_setter(self.value,self.children)
+
+class FuncCall(Node):
+    def __init__(self, value, child):
+        self.value = value
+        self.children = child
+    
+    def Evaluate(self, table):
+
+        nodes = table.func_getter(self.value)
+        # print(self.value,nodes)
+
+        func_table = SymbolTable()
+
+        # if node[1] == "function":
+        # func_table.func_setter(self.value, (None, node[0].children[0].Evaluate(table)))
+        # print(func_table)
+
+        for node in nodes:
+            node.Evaluate(func_table) ##
+
+            # result = self.children.Evaluate(table)
+
+            # func_table.func_setter(node, result)
+
+        # node.Evaluate(func_table)
+        return table.func_getter(self.value)
+
+
 class AssignOp(Node):
     def __init__(self, value, child):
         self.value = value
         self.children = child
 
     def Evaluate(self,table):
-        iden = self.value
-        #val  = self.children.Evaluate(table)
+        # val  = self.children.Evaluate(table)
 
         table.setter(self.value,self.children.Evaluate(table))
 
@@ -432,13 +492,16 @@ class Parser():
             # result = None
             if Parser.tokens.actual.tokenType== "iden":
                 var = Parser.tokens.actual.tokenValue
+
                 Parser.tokens.selectNext()
 
                 if Parser.tokens.actual.tokenValue== "=":
                     Parser.tokens.selectNext()
+                    
                     result = AssignOp(var,Parser.parseRelExpression(Parser.tokens))
 
                 else:
+                    print(Parser.tokens.actual.tokenValue)
                     raise Exception("Erro, verifique a exprecao =") 
 
             elif Parser.tokens.actual.tokenValue== "echo":
@@ -489,6 +552,62 @@ class Parser():
                             result = WhileOp([node,Parser.parseBlock()])
 
                 return result
+
+            elif Parser.tokens.actual.tokenType == "function_d":
+
+                func_name = Parser.tokens.actual.tokenValue
+                Parser.tokens.selectNext()
+
+                if  Parser.tokens.actual.tokenValue == "(":
+                    arg_list = []
+                    children = []
+
+                    Parser.tokens.selectNext()
+
+                    while Parser.tokens.actual.tokenValue != ")":
+
+                        if Parser.tokens.actual.tokenType== "iden" or  Parser.tokens.actual.tokenType == "comma":
+                            arg_list.append(Parser.tokens.actual.tokenValue)
+                            Parser.tokens.selectNext()
+
+                        else:
+                            raise Exception("Erro, verifique a exprecao: funcao mal declarada")    
+
+                    Parser.tokens.selectNext()
+
+                    if Parser.tokens.actual.tokenValue=="{":
+                        children.append(Parser.parseCommand())
+
+                        return FuncDec(func_name, children)
+
+                    else:
+                        raise Exception("Erro, verifique a exprecao: funcao mal declarada")    
+
+                else:
+                    raise Exception("Erro, verifique a exprecao: funcao mal declarada")    
+
+            elif Parser.tokens.actual.tokenType == "function_c":
+                func_name = Parser.tokens.actual.tokenValue
+                Parser.tokens.selectNext()
+
+                if  Parser.tokens.actual.tokenValue == "(":
+                    arg_list = []
+                    while Parser.tokens.actual.tokenValue != ")":
+
+                        if Parser.tokens.actual.tokenType== "iden":
+                            arg_list.append(Parser.tokens.actual.tokenValue)
+                        
+                        Parser.tokens.selectNext()
+
+                    Parser.tokens.selectNext()
+
+                    return FuncCall(func_name, arg_list)
+                
+                else:
+                    raise Exception("Erro, verifique a exprecao: funcao mal declarada")    
+
+            elif Parser.tokens.actual.tokenValue == "return":
+                return Parser.parseFactor()
 
             if Parser.tokens.actual.tokenValue== ";":
                 try:
@@ -586,8 +705,31 @@ class Parser():
 
                     return result
 
+        elif  Parser.tokens.actual.tokenValue == "return":
+            print("call with ret")
+
+            Parser.tokens.selectNext()
+            func_name = Parser.tokens.actual.tokenValue
+
+            if  Parser.tokens.actual.tokenValue == "(":
+                arg_list = []
+                while Parser.tokens.actual.tokenValue != ")":
+
+                    if Parser.tokens.actual.tokenType== "iden":
+                        arg_list.append(Parser.tokens.actual.tokenValue)
+                    
+                    Parser.tokens.selectNext()
+
+                Parser.tokens.selectNext()
+
+                return FuncCall(func_name, arg_list)
+            
+            else:
+                print(Parser.tokens.actual.tokenValue)
+                raise Exception("Erro, verifique a exprecao: funcao mal declarada")    
+
         else: 
-            print((Parser.tokens.actual.tokenValue))
+            print((Parser.tokens.actual.tokenValue),(Parser.tokens.actual.tokenType))
             raise Exception("Erro, verifique a exprecao a")        
        
     @staticmethod
