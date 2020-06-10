@@ -54,6 +54,8 @@ class Tokenizer():
         self.positon = 0
         self.actual = None
         self.counter = 0
+        self.counterb = 0
+
         self.selectNext()
     
     def selectNext(self):
@@ -98,10 +100,15 @@ class Tokenizer():
         elif self.origin[self.positon] == "{":
             self.actual = Token('command' , '{')
             self.positon+=1
+            self.counterb-=1
 
         elif self.origin[self.positon] == "}":
             self.actual = Token('command' , '}')
             self.positon+=1
+            self.counterb+=1
+
+            if self.counterb>0:
+                raise Exception("Erro, verifique a exprecao }")      
 
         elif self.origin[self.positon] == ";":
             self.actual = Token('endline' , ';')
@@ -231,6 +238,9 @@ class Tokenizer():
         elif self.origin[self.positon] == "?" and self.origin[self.positon+1] == ">" :
             self.positon+=2
             self.actual = Token('?>' , '?>')
+
+            if self.counterb<0:
+                raise Exception("Erro, verifique a exprecao }")      
 
         else:
             raise Exception("Erro, token invalido",self.origin[self.positon])        
@@ -513,6 +523,10 @@ class Parser():
             elif Parser.tokens.actual.tokenValue== "echo":
                 Parser.tokens.selectNext()
                 result = EchoOp(Parser.parseRelExpression(Parser.tokens))
+                if Parser.tokens.actual.tokenValue== "}":
+                    print(Parser.tokens.actual.tokenValue)
+                    raise Exception("Erro, verifique a exprecao: funcao mal declarada")  
+
                 return result
 
             elif Parser.tokens.actual.tokenValue == "if":
@@ -636,6 +650,7 @@ class Parser():
     def parseBlock():
         if Parser.tokens.actual.tokenValue== "{" or Parser.tokens.actual.tokenValue== "<?php" :
             commands = []
+
             while Parser.tokens.actual.tokenValue != "}" and Parser.tokens.actual.tokenValue != "?>":
 
                 Parser.tokens.selectNext()
@@ -651,6 +666,7 @@ class Parser():
                     commands.append(c)
 
                 C =CommandOp(commands)
+
                 if Parser.tokens.actual.tokenValue!= "?>":
                     Parser.tokens.selectNext() ##
 
