@@ -30,10 +30,12 @@
     echo $x;
     function soma($x, $y) {
         $a = $x + $y;
-        return $a;
+        echo $a;
+        /*return $a*/;
     }
-    $c = soma(1,2);
-    echo $c;
+    $j =2;
+    soma($j,2);
+    /*echo $c; */
 
     /*function soma() {
         $m = 1 + 2;

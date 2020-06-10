@@ -242,7 +242,6 @@ class BinOp(Node):
         self.children = child
         
     def Evaluate(self,table):
-        
         if self.value == '+':
             result = self.children[0].Evaluate(table)[0] + self.children[1].Evaluate(table)[0]
             return (result,"int")
@@ -384,22 +383,15 @@ class FuncCall(Node):
     def Evaluate(self, table):
 
         nodes = table.func_getter(self.value)
-        # print(self.value,nodes)
-
+    
         func_table = SymbolTable()
 
-        # if node[1] == "function":
-        # func_table.func_setter(self.value, (None, node[0].children[0].Evaluate(table)))
-        # print(func_table)
+        for var in range(len(nodes[0])):
+            func_table.setter(nodes[0][var],self.children[var].Evaluate(table))
 
-        for node in nodes:
+        for node in nodes[1]:
             node.Evaluate(func_table) ##
-
-            # result = self.children.Evaluate(table)
-
-            # func_table.func_setter(node, result)
-
-        # node.Evaluate(func_table)
+            
         return table.func_getter(self.value)
 
 
@@ -567,7 +559,8 @@ class Parser():
                     while Parser.tokens.actual.tokenValue != ")":
 
                         if Parser.tokens.actual.tokenType== "iden" or  Parser.tokens.actual.tokenType == "comma":
-                            arg_list.append(Parser.tokens.actual.tokenValue)
+                            if Parser.tokens.actual.tokenType== "iden":
+                                arg_list.append(Parser.tokens.actual.tokenValue)
                             Parser.tokens.selectNext()
 
                         else:
@@ -578,7 +571,7 @@ class Parser():
                     if Parser.tokens.actual.tokenValue=="{":
                         children.append(Parser.parseCommand())
 
-                        return FuncDec(func_name, children)
+                        return FuncDec(func_name, (arg_list,children))
 
                     else:
                         raise Exception("Erro, verifique a exprecao: funcao mal declarada")    
@@ -592,12 +585,13 @@ class Parser():
 
                 if  Parser.tokens.actual.tokenValue == "(":
                     arg_list = []
+                    Parser.tokens.selectNext()
+                   
                     while Parser.tokens.actual.tokenValue != ")":
 
-                        if Parser.tokens.actual.tokenType== "iden":
-                            arg_list.append(Parser.tokens.actual.tokenValue)
-                        
-                        Parser.tokens.selectNext()
+                        arg_list.append(Parser.parseRelExpression(Parser.tokens.actual))
+          
+                    print(arg_list)
 
                     Parser.tokens.selectNext()
 
@@ -652,7 +646,8 @@ class Parser():
 
     @staticmethod
     def parseFactor():
-
+        if Parser.tokens.actual.tokenValue == ",":
+            Parser.tokens.selectNext()
         if str(Parser.tokens.actual.tokenValue).isdigit():
             result = IntVal(Parser.tokens.actual.tokenValue, [])
             return result
@@ -737,7 +732,7 @@ class Parser():
         node = Parser.parseFactor()
         Parser.tokens.selectNext()
         
-        while Parser.tokens.actual.tokenValue == "*" or Parser.tokens.actual.tokenValue == "/" or Parser.tokens.actual.tokenValue == "and" :
+        while Parser.tokens.actual.tokenValue == "*" or Parser.tokens.actual.tokenValue == "/" or Parser.tokens.actual.tokenValue == "and":
 
             if Parser.tokens.actual.tokenValue =="*":
                 Parser.tokens.selectNext()
@@ -782,7 +777,7 @@ class Parser():
                 Parser.tokens.selectNext()
                 child = [node, Parser.parseTerm()]
                 node = BinOp('.', child)
-        
+
         return node
 
     @staticmethod
