@@ -228,6 +228,8 @@ class Tokenizer():
                     break
                 else:
                     self.positon+=1
+            if self.origin[self.positon]=='?':
+                raise Exception("Erro, verifique a exprecao }")      
 
             self.actual = Token('int', int(num))  
 
@@ -377,6 +379,8 @@ class SymbolTable():
     def func_setter(iden, value):
         if iden not in SymbolTable.func_dict or iden !="function":
             SymbolTable.func_dict[iden] = value
+        else:
+            raise Exception("Erro, verifique a exprecao funcao ja declarada")
 
 class FuncDec(Node):
     def __init__(self, value, child):
@@ -384,7 +388,10 @@ class FuncDec(Node):
         self.children = child
 
     def Evaluate(self,table):
-        table.func_setter(self.value,self.children)
+        if self.value in table.func_dict:
+            raise Exception("Erro, verifique a exprecao funcao ja declarada")
+        else:
+            table.func_setter(self.value,self.children)
 
 class FuncCall(Node):
     def __init__(self, value, child):
@@ -401,14 +408,11 @@ class FuncCall(Node):
             func_table.setter(nodes[0][var],self.children[var].Evaluate(table))
 
         for node in nodes[1]:
-
             node.Evaluate(func_table) ##
-
         try:
             return func_table.func_getter("return")
         except:
             pass
-        # return table.func_getter(self.value)
 
 class ReturnOp(Node):
     def __init__(self, value):
@@ -417,8 +421,6 @@ class ReturnOp(Node):
     def Evaluate(self,table):
 
         table.func_setter("return",self.value.Evaluate(table))
-
-        # print(table.getter("function"))
 
 class AssignOp(Node):
     def __init__(self, value, child):
