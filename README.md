@@ -9,9 +9,10 @@
 ![Image of DS](./DS.jpg)
 
 ###### EBNF
-
+    PROGRAM = "<?", { COMMAND }, "?>" ;
     BLOCK = "{", { COMMAND }, "}" ;
-    COMMAND = ( λ | ASSIGNMENT | WHILE | IF | PRINT), ";" | BLOCK ;
+    COMMAND = ( λ | ASSIGNMENT | WHILE | IF | PRINT | FUNCTION | RETURN), ";" | BLOCK ;
+    FUNCTION = "function", name , "(", {IDENTIFIER {",", IDENTIFIER} }, ")", BLOCK;
     ASSIGNMENT = IDENTIFIER, "=", EXPRESSION, ";" ;
     PRINT = "echo", EXPRESSION, ";" ;
     WHILE = "while","(", RelEXPRESSION, ")"| BLOCK ;
